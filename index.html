@@ -165,7 +165,7 @@ function renderPrompt(){
   if(s===2)p.innerHTML=`<p class="kicker">Step 3 · Subsidiary calculation</p><h2>Does the SBT taxpayer own a downstream entity over the control threshold?</h2><p>Open this branch if the SBT taxpayer owns more than 50% of a subsidiary or downstream entity.</p><div class="note">Scope: any downstream entity where the SBT taxpayer owns more than 50% of the relevant ownership measure. For corporations, use vote or value. For partnerships, use profits or capital. For trusts or estates, use actuarial interest.</div><div class="choice-row"><button class="${state.hasSub===true?'gold':'secondary'}" onclick="state.hasSub=true;render()">Yes</button><button class="${state.hasSub===false?'gold':'secondary'}" onclick="state.hasSub=false;render()">No</button></div>${state.hasSub?`<label>Subsidiary / downstream name</label><input id="subName" placeholder="Entity name" value="${esc(state.subName)}" oninput="state.subName=this.value||'Subsidiary / Downstream';liveUpdate();">${entityTypeSelect('subType',state.subType)}${entityYearInputs('sub',state.subY1,state.subY2,state.subY3)}<div class="entity-average" id="subAvg">Subsidiary average: ${money(subAverage())}</div>`:''}${navHtml()}`;
   if(s===3){const ownerInputs=()=>{const count=Math.max(0,Number(state.ownerCount||0));return count?`<label>Common owners</label><div class="owner-grid"><div class="head">Owner</div><div class="head">SBT %</div>${Array.from({length:count},(_,i)=>{const existing=state.ownerNames[i]||{};const ownerId=`ownerName${i}`,pctId=`ownerPct${i}`;return `<div data-common-owner-row="${i}" style="display:contents"><div><input id="${ownerId}" placeholder="Owner ${i+1} name" value="${esc(existing.name||'')}" oninput="commonOwnerChanged()"><div class="field-error" id="${ownerId}Error"></div></div><div><input id="${pctId}" type="number" min="0" max="100" placeholder="SBT %" value="${inputValue(existing.pct)}" onfocus="selectDefaultZero(this)" oninput="commonOwnerChanged()"><div class="field-error" id="${pctId}Error"></div></div></div>`;}).join('')}</div>`:''};p.innerHTML=`<p class="kicker">Step 4 · Brother-sister calculation</p><h2>Is the SBT taxpayer owned by an individual, trust, or estate?</h2><p>This branch only looks at individuals, estates, and trusts as common owners.</p><div class="choice-row"><button class="${state.ownerStatus==='yes'?'gold':'secondary'}" onclick="state.ownerStatus='yes';state.hasOwners=true;render()">Yes</button><button class="${state.ownerStatus==='no'?'gold':'secondary'}" onclick="state.ownerStatus='no';state.hasOwners=false;render()">No</button></div>${state.ownerStatus==='yes'?`<label>How many individuals, estates, or trusts own any interest in the SBT taxpayer?</label><input id="ownerCount" type="number" min="0" max="5" placeholder="number of owners" value="${inputValue(state.ownerCount)}" onfocus="selectDefaultZero(this)" oninput="state.ownerCount=Number(this.value||0);render()"><div class="field-error" id="ownerCountError"></div><button class="link" onclick="state.ownerStatus='not-sure';state.hasOwners=null;render()">Not sure</button>${ownerInputs()}<div class="note">Continue to candidate testing when five or fewer individuals, estates, or trusts may satisfy the 80% control test and the more-than-50% identical-ownership test.</div>`:''}${state.ownerStatus==='not-sure'?`<div class="subq">Do five or fewer individuals, estates, or trusts together own enough interests to test brother-sister aggregation?</div><div class="choice-row"><button class="${state.hasOwners===true?'gold':'secondary'}" onclick="state.hasOwners=true;state.ownerStatus='yes';state.ownerCount=state.ownerCount||0;render()">Yes</button><button class="${state.hasOwners===false?'gold':'secondary'}" onclick="state.hasOwners=false;render()">No</button></div>`:''}${state.hasOwners===false?`<div class="note">No qualifying common-owner group identified. The brother-sister branch closes unless facts change.</div>`:''}${navHtml()}`;}
   if(s===4){syncCandidateOwnerNames();const c=state.currentCandidate,r=testCandidate(c);p.innerHTML=`<p class="kicker">Step 5 · Candidate calculation</p><h2>Test one potential brother-sister entity.</h2><p>Use the same common owners. GRACE applies the 80% control test and the lesser-of identical-ownership test.</p><label>Candidate brother-sister name</label><input id="candName" placeholder="Entity name" value="${esc(c.name)}" oninput="candidateInputsChanged()"><div class="field-error" id="candNameError"></div>${entityTypeSelect('candType',c.type,'candidateInputsChanged()')}${entityYearInputs('cand',c.y1,c.y2,c.y3)}<div class="entity-average" id="candAvg">Candidate average: ${money(candidateAverage(c))}</div><div class="candidate-owner-grid"><div class="head">Owner</div><div class="head">SBT %</div><div class="head">Cand. %</div>${c.owners.map((o,i)=>{const nameId=`candOwnerName${i}`,sbtId=`candOwnerSbt${i}`,candId=`candOwnerPct${i}`;return `<div data-owner-row="${i}" style="display:contents"><div><input id="${nameId}" value="${esc(o.name)}" oninput="candidateInputsChanged()"><div class="field-error" id="${nameId}Error"></div></div><div><input id="${sbtId}" type="number" min="0" max="100" value="${inputValue(o.sbt)}" onfocus="selectDefaultZero(this)" oninput="candidateInputsChanged()"><div class="field-error" id="${sbtId}Error"></div></div><div><input id="${candId}" type="number" min="0" max="100" value="${inputValue(o.cand)}" onfocus="selectDefaultZero(this)" oninput="candidateInputsChanged()"><div class="field-error" id="${candId}Error"></div></div></div>`;}).join('')}</div><div class="callout candidate-result">${resultHtml(r)}</div><div id="formError" class="form-error"></div><div class="nav-row"><button class="secondary" onclick="back()">Back</button><div><button class="link" onclick="showReferenceFromApp()">Gross receipts table</button><button class="gold" onclick="addCandidate(true)">Add candidate</button><button onclick="finishCandidates()">Done</button></div></div>`;}
-  if(s===5)p.innerHTML=`<p class="kicker">Step 6 · Review</p><h2>Review the aggregation map and receipts scale.</h2><p>The scale includes the taxpayer and any branch that has been included.</p><div class="note">Drafts save automatically in this browser. Use Export for a portable JSON copy of the current intake and result state.</div><div class="nav-row"><button class="secondary" onclick="back()">Back</button><div><button class="link" onclick="showReferenceFromApp()">Gross receipts table</button>${state.hasOwners?'<button class="gold" onclick="state.step=4;render()">Add candidate</button>':''}<button class="ghost" onclick="resetCandidates()">Clear candidates</button></div></div>`;
+  if(s===5)p.innerHTML=`<p class="kicker">Step 6 · Review</p><h2>Review the aggregation map and receipts scale.</h2><p>The scale includes the taxpayer and any branch that has been included.</p><div class="note">Use Export for a portable visual copy of the current intake and result screens.</div><div class="nav-row"><button class="secondary" onclick="back()">Back</button><div><button class="link" onclick="showReferenceFromApp()">Gross receipts table</button>${state.hasOwners?'<button class="gold" onclick="state.step=4;render()">Add candidate</button>':''}<button class="ghost" onclick="resetCandidates()">Clear candidates</button></div></div>`;
 }
 function includedItems(){const items=[{name:state.sbtName||'Candidate SBT',receipts:sbtAverage()}];if(state.hasParent)items.push({name:state.parentName,receipts:parentAverage()});if(state.hasSub)items.push({name:state.subName,receipts:subAverage()});state.candidates.filter(c=>c.included).forEach(c=>items.push({name:c.name,receipts:candidateAverage(c)}));return items;}
 function hideNode(id){$(id).style.display='none';}function showNode(id){$(id).style.display='flex';}
@@ -185,11 +185,60 @@ function initMapPan(){const map=$('map');if(!map)return;map.addEventListener('po
 function copyEmail(el){const email=typeof el==='string'?el:el?.dataset?.email;if(!email)return;const notice=$('copyNotice');const show=()=>{if(notice){notice.textContent=`Copied ${email} to clipboard.`;setTimeout(()=>{if(notice.textContent.includes(email))notice.textContent='';},2200);}};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(email).then(show).catch(()=>fallbackCopyEmail(email,show));}else fallbackCopyEmail(email,show);}
 function fallbackCopyEmail(email,after){const area=document.createElement('textarea');area.value=email;area.setAttribute('readonly','');area.style.position='fixed';area.style.left='-9999px';document.body.appendChild(area);area.select();try{document.execCommand('copy');}catch(e){}area.remove();after();}
 function serializeState(){saveFields();const savedState={...state,step:0};return JSON.stringify({version:4,savedAt:new Date().toISOString(),state:savedState},null,2);}
-function saveDraft(){try{localStorage.setItem(STORAGE_KEY,serializeState());}catch(e){/* storage may be unavailable */}}
+function saveDraft(){/* Browser draft storage disabled so gross receipts start blank on each new session. */}
 function deepMerge(target,source){Object.keys(source||{}).forEach(k=>{if(source[k]&&typeof source[k]==='object'&&!Array.isArray(source[k])&&target[k]&&typeof target[k]==='object'&&!Array.isArray(target[k]))deepMerge(target[k],source[k]);else target[k]=source[k];});return target;}
 function normalizeState(){state.taxYear=Number(state.taxYear)||2025;if(!state.currentCandidate)state.currentCandidate=makeCandidate(state.candidates.length+1);if(!Array.isArray(state.candidates))state.candidates=[];if(!Array.isArray(state.ownerNames))state.ownerNames=[];state.candidates=state.candidates.map((c,i)=>{const merged=deepMerge(makeCandidate(i+1),c);const r=testCandidate(merged);return {...merged,...r};});}
-function loadDraft(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;const parsed=JSON.parse(raw);if(parsed&&parsed.state){deepMerge(state,parsed.state);normalizeState();state.step=0;}}catch(e){console.warn('GRACE draft could not be loaded',e);}}
-function exportState(){const blob=new Blob([serializeState()],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`grace-draft-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);}
+function loadDraft(){try{Object.keys(localStorage).filter(k=>k.toLowerCase().startsWith('grace')).forEach(k=>localStorage.removeItem(k));}catch(e){/* storage may be unavailable */}}
+function exportState(){
+  saveFields();
+  const capturedAt=new Date();
+  const stateSnapshot=JSON.parse(JSON.stringify(state));
+  const mapSnapshot={...mapState};
+  const css=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+  const restoreApp=()=>{
+    Object.keys(state).forEach(k=>delete state[k]);
+    Object.assign(state, JSON.parse(JSON.stringify(stateSnapshot)));
+    Object.assign(mapState,mapSnapshot);
+    render();
+    applyMapTransform();
+    renderLines();
+  };
+  const snapStep=i=>{
+    state.step=i;
+    render();
+    try{fitMap();}catch(e){applyMapTransform();}
+    renderLines();
+    const title=steps[i]||`Step ${i+1}`;
+    const wizard=document.querySelector('.wizard').cloneNode(true);
+    const scale=document.querySelector('.scale').cloneNode(true);
+    const chart=document.querySelector('.chart-card').cloneNode(true);
+    const trail=document.querySelector('.summary').cloneNode(true);
+    scale.querySelectorAll('.fill').forEach(fill=>{
+      fill.style.background='linear-gradient(90deg,var(--gold),#d18b00,var(--red))';
+    });
+    return `<section class="export-page"><h2>${esc(title)}</h2><div class="export-screen">${wizard.outerHTML}<section class="right">${scale.outerHTML}${chart.outerHTML}${trail.outerHTML}</section></div></section>`;
+  };
+  try{
+    let pages='';
+    for(let i=0;i<steps.length;i++)pages+=snapStep(i);
+    const report=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GRACE Visual Export</title><style>${css}
+body{padding:28px;background:#fff}.export-cover{border-bottom:3px solid #111;margin-bottom:22px;padding-bottom:14px}.export-cover h1{margin:0;font-size:26px}.export-cover p{margin:6px 0 0;color:var(--muted)}.export-page{break-after:page;page-break-after:always;margin:0 0 32px}.export-page h2{margin:0 0 12px;font-size:21px}.export-screen{display:flex;gap:18px;align-items:flex-start}.export-screen .wizard{resize:none;overflow:visible}.export-screen button{pointer-events:none}.export-screen .map{cursor:default}.export-screen .fill{background:linear-gradient(90deg,var(--gold),#d18b00,var(--red))!important}.tour-overlay,.disclaimer-overlay,.prototype-v1-footer{display:none!important}@media print{body{padding:0}.export-page{margin-bottom:0}.export-screen{zoom:.82}}</style></head><body><div class="export-cover"><h1>GRACE Visual Export</h1><p>Gross Receipts Aggregation &amp; Control Evaluator</p><p>Exported ${capturedAt.toLocaleString()}</p></div>${pages}</body></html>`;
+    const blob=new Blob([report],{type:'text/html'});
+    const a=document.createElement('a');
+    const url=URL.createObjectURL(blob);
+    a.href=url;
+    a.download=`grace-visual-export-${capturedAt.toISOString().slice(0,10)}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(err){
+    alert('GRACE export failed. The intake screen has been restored.');
+    console.error(err);
+  }finally{
+    restoreApp();
+  }
+}
 function startTour(){pendingTour=false;tourIndex=0;$('tourOverlay').classList.remove('hidden');positionTour();}
 function skipTour(){$('tourOverlay').classList.add('hidden');}
 function nextTourStep(){tourIndex++;if(tourIndex>=tourSteps.length){skipTour();return;}positionTour();}
