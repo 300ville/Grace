@@ -1,1 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tax Dash</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #111827;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title {
+      margin: 8px 0 4px;
+      font-size: 25px;
+      letter-spacing: 1px;
+      font-weight: 900;
+    }
+
+    .sub {
+      margin-bottom: 8px;
+      color: #d1d5db;
+      font-size: 13px;
+    }
+
+    .stage {
+      position: relative;
+      width: 900px;
+      height: 480px;
+    }
+
+    canvas {
+      display: block;
+      width: 900px;
+      height: 480px;
+      background: linear-gradient(#93c5fd, #dbeafe 60%, #bbf7d0 60%);
+      border: 4px solid #020617;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      image-rendering: pixelated;
+    }
+
+    #splash {
+      position: absolute;
+      inset: 4px;
+      z-index: 20;
+      background: linear-gradient(#fff7ed 0%, #fef3c7 52%, #dbeafe 52%, #bbf7d0 100%);
+      color: #111827;
+      border: 4px solid #020617;
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #splash h1 {
+      margin: 0;
+      font-size: 29px;
+      line-height: 1.05;
+      color: #111827;
+      font-weight: 900;
+    }
+
+    #splash h2 {
+      margin: 8px 0 6px;
+      font-size: 22px;
+      color: #991b1b;
+      font-weight: 900;
+    }
+
+    #splash p {
+      margin: 3px 0;
+      font-size: 15px;
+      line-height: 1.25;
+      color: #1f2937;
+      font-weight: 700;
+    }
+
+    .animal-line {
+      width: 720px;
+      height: 54px;
+      margin: 8px 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .line-rule {
+      height: 4px;
+      flex: 1;
+      background: #111827;
+      border-radius: 999px;
+    }
+
+    .ferret-art {
+      position: relative;
+      width: 150px;
+      height: 54px;
+      flex: none;
+    }
+
+    .ferret-art .body {
+      position: absolute;
+      left: 14px;
+      top: 25px;
+      width: 92px;
+      height: 20px;
+      background: #8b5a2b;
+      border: 3px solid #4b2e18;
+      border-radius: 999px;
+    }
+
+    .ferret-art .belly {
+      position: absolute;
+      left: 37px;
+      top: 31px;
+      width: 47px;
+      height: 9px;
+      background: #d6b48c;
+      border-radius: 999px;
+    }
+
+    .ferret-art .tail {
+      position: absolute;
+      left: 0;
+      top: 29px;
+      width: 28px;
+      height: 10px;
+      background: #5c3317;
+      border-radius: 999px;
+      transform: rotate(-18deg);
+    }
+
+    .ferret-art .head {
+      position: absolute;
+      left: 92px;
+      top: 13px;
+      width: 40px;
+      height: 34px;
+      background: #c49a6c;
+      border: 3px solid #4b2e18;
+      border-radius: 50%;
+    }
+
+    .ferret-art .ear1, .ferret-art .ear2 {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #5c3317;
+      border-radius: 50%;
+      top: 8px;
+    }
+
+    .ferret-art .ear1 { left: 97px; }
+    .ferret-art .ear2 { left: 120px; }
+
+    .ferret-art .mask {
+      position: absolute;
+      left: 98px;
+      top: 24px;
+      width: 28px;
+      height: 9px;
+      background: #2f1b0c;
+      border-radius: 999px;
+    }
+
+    .ferret-art .eye1, .ferret-art .eye2 {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      top: 26px;
+    }
+
+    .ferret-art .eye1 { left: 103px; }
+    .ferret-art .eye2 { left: 119px; }
+
+    .ferret-art .nose {
+      position: absolute;
+      left: 112px;
+      top: 34px;
+      width: 7px;
+      height: 5px;
+      background: #111827;
+      border-radius: 50%;
+    }
+
+    .ferret-art .leg1, .ferret-art .leg2 {
+      position: absolute;
+      top: 42px;
+      width: 7px;
+      height: 11px;
+      background: #3f2918;
+      border-radius: 4px;
+    }
+
+    .ferret-art .leg1 { left: 40px; }
+    .ferret-art .leg2 { left: 82px; }
+
+    .choose-title {
+      margin: 4px 0 8px;
+      font-size: 23px;
+      color: #111827;
+      font-weight: 900;
+    }
+
+    .choice-row {
+      display: flex;
+      gap: 18px;
+      margin-top: 0;
+    }
+
+    .choice {
+      width: 328px;
+      height: 176px;
+      border: 4px solid #111827;
+      border-radius: 16px;
+      background: white;
+      color: #111827;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 138px 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(0,0,0,.25);
+    }
+
+    .choice:hover {
+      transform: translateY(-2px);
+      background: #fef3c7;
+    }
+
+    .choice-title {
+      font-size: 25px;
+      text-align: left;
+      line-height: 1.05;
+    }
+
+    .choice-desc {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.25;
+      text-align: left;
+      font-weight: 800;
+      color: #374151;
+    }
+
+    .big-ferret {
+      position: relative;
+      width: 136px;
+      height: 142px;
+    }
+
+    .big-ferret .body {
+      position:absolute;
+      left: 4px;
+      top: 61px;
+      width: 91px;
+      height: 27px;
+      background: #8b5a2b;
+      border: 3px solid #4b2e18;
+      border-radius: 999px;
+    }
+
+    .big-ferret .belly {
+      position:absolute;
+      left: 28px;
+      top: 69px;
+      width: 48px;
+      height: 11px;
+      background: #d6b48c;
+      border-radius: 999px;
+    }
+
+    .big-ferret .tail {
+      position:absolute;
+      left: 0;
+      top: 64px;
+      width: 24px;
+      height: 10px;
+      background: #5c3317;
+      border-radius: 999px;
+      transform: rotate(-25deg);
+    }
+
+    .big-ferret .head {
+      position:absolute;
+      left: 75px;
+      top: 31px;
+      width: 48px;
+      height: 45px;
+      background: #c49a6c;
+      border: 3px solid #4b2e18;
+      border-radius: 50%;
+    }
+
+    .big-ferret .ear1, .big-ferret .ear2 {
+      position:absolute;
+      top: 23px;
+      width: 14px;
+      height: 14px;
+      background: #5c3317;
+      border-radius: 50%;
+    }
+
+    .big-ferret .ear1 { left: 82px; }
+    .big-ferret .ear2 { left: 110px; }
+
+    .big-ferret .mask {
+      position:absolute;
+      left: 83px;
+      top: 47px;
+      width: 33px;
+      height: 11px;
+      background: #2f1b0c;
+      border-radius: 999px;
+    }
+
+    .big-ferret .eye1, .big-ferret .eye2 {
+      position:absolute;
+      top: 50px;
+      width: 5px;
+      height: 5px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .big-ferret .eye1 { left: 89px; }
+    .big-ferret .eye2 { left: 108px; }
+
+    .big-ferret .nose {
+      position:absolute;
+      left: 99px;
+      top: 61px;
+      width: 8px;
+      height: 5px;
+      background: #111827;
+      border-radius: 50%;
+    }
+
+    .big-ferret .leg1, .big-ferret .leg2 {
+      position:absolute;
+      top: 85px;
+      width: 8px;
+      height: 24px;
+      background: #3f2918;
+      border-radius: 4px;
+    }
+
+    .big-ferret .leg1 { left: 31px; }
+    .big-ferret .leg2 { left: 72px; }
+
+    .big-ferret .label {
+      position:absolute;
+      left: 0;
+      top: 115px;
+      width: 136px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #166534;
+      text-align: center;
+    }
+
+    .big-dog {
+      position: relative;
+      width: 136px;
+      height: 142px;
+    }
+
+    .big-dog .body {
+      position:absolute;
+      left: 10px;
+      top: 65px;
+      width: 86px;
+      height: 30px;
+      background: #9a5a22;
+      border: 3px solid #4a1d0b;
+      border-radius: 999px;
+    }
+
+    .big-dog .chest {
+      position:absolute;
+      left: 70px;
+      top: 70px;
+      width: 23px;
+      height: 18px;
+      background: #facc15;
+      border-radius: 50%;
+    }
+
+    .big-dog .head {
+      position:absolute;
+      left: 78px;
+      top: 35px;
+      width: 45px;
+      height: 45px;
+      background: #9a5a22;
+      border: 3px solid #4a1d0b;
+      border-radius: 45% 45% 50% 50%;
+    }
+
+    .big-dog .ear1, .big-dog .ear2 {
+      position:absolute;
+      top: 34px;
+      width: 21px;
+      height: 36px;
+      background: #4a1d0b;
+      border-radius: 999px;
+    }
+
+    .big-dog .ear1 { left: 68px; transform: rotate(24deg); }
+    .big-dog .ear2 { left: 111px; transform: rotate(-24deg); }
+
+    .big-dog .muzzle {
+      position:absolute;
+      left: 91px;
+      top: 58px;
+      width: 22px;
+      height: 14px;
+      background: #facc15;
+      border-radius: 999px;
+    }
+
+    .big-dog .eye1, .big-dog .eye2 {
+      position:absolute;
+      top: 51px;
+      width: 5px;
+      height: 5px;
+      background: #111827;
+      border-radius: 50%;
+    }
+
+    .big-dog .eye1 { left: 90px; }
+    .big-dog .eye2 { left: 108px; }
+
+    .big-dog .nose {
+      position:absolute;
+      left: 101px;
+      top: 64px;
+      width: 7px;
+      height: 5px;
+      background: #111827;
+      border-radius: 50%;
+    }
+
+    .big-dog .tail {
+      position:absolute;
+      left: 0;
+      top: 66px;
+      width: 21px;
+      height: 9px;
+      background: #4a1d0b;
+      border-radius: 999px;
+      transform: rotate(-30deg);
+    }
+
+    .big-dog .leg1, .big-dog .leg2 {
+      position:absolute;
+      top: 92px;
+      width: 8px;
+      height: 22px;
+      background: #4a1d0b;
+      border-radius: 4px;
+    }
+
+    .big-dog .leg1 { left: 31px; }
+    .big-dog .leg2 { left: 71px; }
+
+    .big-dog .label {
+      position:absolute;
+      left: 0;
+      top: 118px;
+      width: 136px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #1d4ed8;
+      text-align: center;
+    }
+
+    .corner-chiweenie {
+      position: absolute;
+      right: 12px;
+      bottom: 5px;
+      transform: scale(.58);
+      transform-origin: right bottom;
+    }
+
+    .hud {
+      width: 900px;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      color: #f9fafb;
+      font-size: 15px;
+    }
+
+    .help {
+      width: 900px;
+      color: #d1d5db;
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Tax Dash</div>
+  <div class="sub">A temporary tax arcade mission while Grace gets rebuilt.</div>
+
+  <div class="stage">
+    <canvas id="game" width="900" height="480"></canvas>
+
+    <div id="splash">
+      <h1>⚠️ GRACE IS CURRENTLY UNDER CONSTRUCTION ⚠️</h1>
+      <h2>SHE RETURNS JUNE 4.</h2>
+      <p>In the meantime, please enjoy this very serious tax arcade game.</p>
+      <p>Collect dollars, avoid paperwork, dodge the incoming audit hawk, and make it to filing day.</p>
+
+      <div class="animal-line" aria-hidden="true">
+        <span class="line-rule"></span>
+        <div class="ferret-art">
+          <span class="tail"></span><span class="body"></span><span class="belly"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="mask"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span>
+        </div>
+        <span class="line-rule"></span>
+      </div>
+
+      <div class="choose-title">CHOOSE YOUR AGENT</div>
+      <div class="choice-row">
+        <button class="choice" type="button" onclick="selectCharacter('ferret')">
+          <div class="big-ferret" aria-label="Ferret">
+            <span class="tail"></span><span class="body"></span><span class="belly"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="mask"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span><span class="label">FERRET</span>
+          </div>
+          <div>
+            <div class="choice-title">PLAY AS FERRET</div>
+            <div class="choice-desc">Long body, mask face, tiny legs. Higher jump.</div>
+          </div>
+        </button>
+
+        <button class="choice" type="button" onclick="selectCharacter('chiweenie')">
+          <div class="big-dog" aria-label="Chiweenie">
+            <span class="tail"></span><span class="body"></span><span class="chest"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="muzzle"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span><span class="label">CHIWEENIE</span>
+          </div>
+          <div>
+            <div class="choice-title">PLAY AS CHIWEENIE</div>
+            <div class="choice-desc">Small long dog, big ears, tiny legs. Faster sprint.</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="corner-chiweenie big-dog" aria-label="Chiweenie decoration">
+        <span class="tail"></span><span class="body"></span><span class="chest"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="muzzle"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span><span class="label">CHIWEENIE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div id="levelText">Level: 1</div>
+    <div id="scoreText">Dollars: 0</div>
+    <div id="livesText">Lives: 3</div>
+  </div>
+  <div class="help">Move: Arrow Keys or A/D. Jump: Space, Arrow Up, or W. Restart after win/loss: R.</div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const levelText = document.getElementById('levelText');
+    const scoreText = document.getElementById('scoreText');
+    const livesText = document.getElementById('livesText');
+
+    const keys = new Set();
+    window.addEventListener('keydown', e => {
+      keys.add(e.key.toLowerCase());
+      if ([' ', 'arrowup', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) e.preventDefault();
+      if (e.key.toLowerCase() === 'r' && (gameOver || gameWon)) resetGame();
+    });
+    window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+
+    const GRAVITY = 0.65;
+    const FRICTION = 0.82;
+    let cameraX = 0;
+    let dollars = 0;
+    let lives = 3;
+    let currentLevel = 0;
+    let gameOver = false;
+    let gameWon = false;
+    let selectedCharacter = null;
+    let tick = 0;
+
+    const levels = [
+      {
+        name: 'Schedule C Prairie',
+        width: 1800,
+        start: { x: 70, y: 330 },
+        platforms: [[0,420,1800,60],[260,340,180,25],[560,295,170,25],[900,345,180,25],[1240,300,190,25]],
+        dollars: [[330,300],[430,300],[630,255],[710,255],[985,305],[1080,305],[1325,260],[1425,260],[1600,370]],
+        hazards: [[805,380,'paperwork'],[1185,380,'section']],
+        hawks: [{x:520,y:145,minX:480,maxX:1040,speed:2.0}],
+        goal: [1690,340]
+      },
+      {
+        name: 'Deduction Desert',
+        width: 2200,
+        start: { x: 70, y: 330 },
+        platforms: [[0,420,2200,60],[300,345,160,25],[590,300,160,25],[860,255,150,25],[1200,335,190,25],[1550,290,180,25]],
+        dollars: [[370,305],[450,305],[650,260],[740,260],[920,215],[990,215],[1285,295],[1380,295],[1625,250],[1725,250],[1940,370]],
+        hazards: [[520,380,'receipt'],[1110,380,'section'],[1460,380,'paperwork'],[1840,380,'receipt']],
+        hawks: [{x:740,y:150,minX:610,maxX:1210,speed:2.4},{x:1620,y:125,minX:1420,maxX:1980,speed:2.0}],
+        goal: [2090,340]
+      },
+      {
+        name: 'The Great Audit Frontier',
+        width: 2600,
+        start: { x: 70, y: 330 },
+        platforms: [[0,420,2600,60],[280,355,150,25],[540,305,150,25],[800,255,150,25],[1080,325,170,25],[1390,265,170,25],[1710,320,190,25],[2060,260,170,25]],
+        dollars: [[350,315],[425,315],[610,265],[700,265],[875,215],[955,215],[1150,285],[1245,285],[1465,225],[1555,225],[1815,280],[1905,280],[2140,220],[2230,220],[2410,370]],
+        hazards: [[465,380,'section'],[700,380,'paperwork'],[990,380,'receipt'],[1300,380,'section'],[1620,380,'paperwork'],[1980,380,'receipt'],[2310,380,'section']],
+        hawks: [{x:760,y:140,minX:560,maxX:1130,speed:2.7},{x:1500,y:105,minX:1230,maxX:1880,speed:2.2},{x:2140,y:150,minX:1970,maxX:2460,speed:2.5}],
+        goal: [2490,340]
+      }
+    ];
+
+    const player = {
+      x: 70,
+      y: 330,
+      w: 54,
+      h: 42,
+      vx: 0,
+      vy: 0,
+      speed: 0.8,
+      maxSpeed: 5.2,
+      jump: -14,
+      grounded: false,
+      invincible: 0
+    };
+
+    function rectsOverlap(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
+    function drawRect(x, y, w, h) {
+      ctx.fillRect(Math.round(x - cameraX), Math.round(y), w, h);
+    }
+
+    function drawText(text, x, y, size = 18, align = 'left') {
+      ctx.font = `${size}px Arial`;
+      ctx.textAlign = align;
+      ctx.fillText(text, Math.round(x - cameraX), Math.round(y));
+    }
+
+    function resetPlayer() {
+      const level = levels[currentLevel];
+      player.x = level.start.x;
+      player.y = level.start.y;
+      player.vx = 0;
+      player.vy = 0;
+      player.invincible = 75;
+    }
+
+    function resetGame() {
+      dollars = 0;
+      lives = 3;
+      currentLevel = 0;
+      gameOver = false;
+      gameWon = false;
+      tick = 0;
+      levels.forEach(level => level.dollars.forEach(d => d.collected = false));
+      resetPlayer();
+    }
+
+    function selectCharacter(type) {
+      selectedCharacter = type;
+      player.maxSpeed = type === 'ferret' ? 5.0 : 6.2;
+      player.jump = type === 'ferret' ? -15.5 : -13.2;
+      document.getElementById('splash').style.display = 'none';
+      resetGame();
+    }
+
+    function hitHazard() {
+      if (player.invincible > 0) return;
+      lives -= 1;
+      if (lives <= 0) gameOver = true;
+      else resetPlayer();
+    }
+
+    function movePlayer() {
+      const left = keys.has('arrowleft') || keys.has('a');
+      const right = keys.has('arrowright') || keys.has('d');
+      const jump = keys.has(' ') || keys.has('arrowup') || keys.has('w');
+
+      if (left) player.vx -= player.speed;
+      if (right) player.vx += player.speed;
+      player.vx = Math.max(-player.maxSpeed, Math.min(player.maxSpeed, player.vx));
+      if (!left && !right) player.vx *= FRICTION;
+
+      if (jump && player.grounded) {
+        player.vy = player.jump;
+        player.grounded = false;
+      }
+
+      player.vy += GRAVITY;
+      player.x += player.vx;
+      resolvePlatforms('x');
+      player.y += player.vy;
+      player.grounded = false;
+      resolvePlatforms('y');
+
+      const level = levels[currentLevel];
+      player.x = Math.max(0, Math.min(level.width - player.w, player.x));
+      if (player.y > canvas.height + 100) hitHazard();
+      if (player.invincible > 0) player.invincible--;
+    }
+
+    function resolvePlatforms(axis) {
+      const level = levels[currentLevel];
+      for (const p of level.platforms) {
+        const plat = { x: p[0], y: p[1], w: p[2], h: p[3] };
+        if (!rectsOverlap(player, plat)) continue;
+
+        if (axis === 'x') {
+          if (player.vx > 0) player.x = plat.x - player.w;
+          if (player.vx < 0) player.x = plat.x + plat.w;
+          player.vx = 0;
+        } else {
+          if (player.vy > 0) {
+            player.y = plat.y - player.h;
+            player.vy = 0;
+            player.grounded = true;
+          } else if (player.vy < 0) {
+            player.y = plat.y + plat.h;
+            player.vy = 0;
+          }
+        }
+      }
+    }
+
+    function updatePickupsAndHazards() {
+      const level = levels[currentLevel];
+
+      for (const d of level.dollars) {
+        if (d.collected) continue;
+        if (rectsOverlap(player, { x: d[0], y: d[1], w: 24, h: 24 })) {
+          d.collected = true;
+          dollars += 1;
+        }
+      }
+
+      for (const h of level.hazards) {
+        if (rectsOverlap(player, { x: h[0], y: h[1], w: 42, h: 42 })) hitHazard();
+      }
+
+      for (const hawk of level.hawks) {
+        const hawkX = hawk.x + Math.sin(tick * 0.025 * hawk.speed) * ((hawk.maxX - hawk.minX) / 2);
+        const center = (hawk.minX + hawk.maxX) / 2;
+        const actualX = center + Math.sin(tick * 0.025 * hawk.speed) * ((hawk.maxX - hawk.minX) / 2);
+        const actualY = hawk.y + Math.sin(tick * 0.04) * 18;
+        if (rectsOverlap(player, { x: actualX, y: actualY, w: 74, h: 38 })) hitHazard();
+      }
+
+      if (rectsOverlap(player, { x: level.goal[0], y: level.goal[1], w: 45, h: 80 })) {
+        if (currentLevel < levels.length - 1) {
+          currentLevel += 1;
+          resetPlayer();
+        } else {
+          gameWon = true;
+        }
+      }
+    }
+
+    function drawFerretSprite(x, y) {
+      const sx = Math.round(x - cameraX);
+      const sy = Math.round(y);
+      ctx.fillStyle = '#5c3317';
+      ctx.fillRect(sx - 6, sy + 25, 16, 7);
+      ctx.fillStyle = '#8b5a2b';
+      ctx.fillRect(sx + 4, sy + 20, 38, 17);
+      ctx.fillStyle = '#d6b48c';
+      ctx.fillRect(sx + 15, sy + 26, 20, 6);
+      ctx.fillStyle = '#c49a6c';
+      ctx.fillRect(sx + 36, sy + 8, 21, 21);
+      ctx.fillStyle = '#5c3317';
+      ctx.fillRect(sx + 39, sy + 4, 7, 7);
+      ctx.fillRect(sx + 52, sy + 4, 7, 7);
+      ctx.fillStyle = '#2f1b0c';
+      ctx.fillRect(sx + 40, sy + 16, 16, 6);
+      ctx.fillStyle = 'white';
+      ctx.fillRect(sx + 43, sy + 17, 3, 3);
+      ctx.fillRect(sx + 52, sy + 17, 3, 3);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(sx + 48, sy + 24, 5, 3);
+      ctx.fillStyle = '#3f2918';
+      ctx.fillRect(sx + 12, sy + 35, 6, 8);
+      ctx.fillRect(sx + 32, sy + 35, 6, 8);
+      ctx.fillStyle = '#111827';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('FERRET', sx + 27, sy - 3);
+    }
+
+    function drawChiweenieSprite(x, y) {
+      const sx = Math.round(x - cameraX);
+      const sy = Math.round(y);
+      ctx.fillStyle = '#4a1d0b';
+      ctx.fillRect(sx - 4, sy + 24, 15, 6);
+      ctx.fillStyle = '#9a5a22';
+      ctx.fillRect(sx + 5, sy + 21, 39, 17);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(sx + 33, sy + 25, 11, 8);
+      ctx.fillStyle = '#9a5a22';
+      ctx.fillRect(sx + 38, sy + 8, 20, 22);
+      ctx.fillStyle = '#4a1d0b';
+      ctx.fillRect(sx + 31, sy + 9, 9, 22);
+      ctx.fillRect(sx + 55, sy + 9, 9, 22);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(sx + 45, sy + 21, 10, 7);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(sx + 43, sy + 16, 3, 3);
+      ctx.fillRect(sx + 53, sy + 16, 3, 3);
+      ctx.fillRect(sx + 50, sy + 25, 5, 3);
+      ctx.fillStyle = '#4a1d0b';
+      ctx.fillRect(sx + 14, sy + 36, 6, 8);
+      ctx.fillRect(sx + 34, sy + 36, 6, 8);
+      ctx.fillStyle = '#111827';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('CHIWEENIE', sx + 30, sy - 3);
+    }
+
+    function drawAuditHawk(x, y, wingFlip) {
+      const sx = Math.round(x - cameraX);
+      const sy = Math.round(y);
+      ctx.fillStyle = '#3f3f46';
+      ctx.fillRect(sx + 20, sy + 14, 34, 16);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(sx + 50, sy + 18, 10, 6);
+      ctx.fillStyle = '#27272a';
+      if (wingFlip) {
+        ctx.fillRect(sx + 4, sy + 4, 26, 10);
+        ctx.fillRect(sx + 43, sy + 4, 26, 10);
+      } else {
+        ctx.fillRect(sx + 4, sy + 30, 26, 10);
+        ctx.fillRect(sx + 43, sy + 30, 26, 10);
+      }
+      ctx.fillStyle = 'white';
+      ctx.fillRect(sx + 43, sy + 17, 5, 5);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(sx + 45, sy + 18, 3, 3);
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('AUDIT HAWK', sx + 36, sy - 5);
+    }
+
+    function drawLevel() {
+      const level = levels[currentLevel];
+      cameraX = Math.max(0, Math.min(level.width - canvas.width, player.x - 260));
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'rgba(255,255,255,.72)';
+      drawText('1040', 130, 90, 28);
+      drawText('W-2', 460, 130, 24);
+      drawText('1099', 760, 80, 24);
+      drawText('K-1', 1160, 120, 24);
+      drawText('IRS', 1510, 95, 24);
+      drawText('TAX', 2020, 115, 24);
+
+      ctx.fillStyle = '#166534';
+      for (const p of level.platforms) drawRect(p[0], p[1], p[2], p[3]);
+      ctx.fillStyle = '#854d0e';
+      for (const p of level.platforms) drawRect(p[0], p[1] + p[3] - 8, p[2], 8);
+
+      for (const d of level.dollars) {
+        if (d.collected) continue;
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.arc(Math.round(d[0] + 12 - cameraX), d[1] + 12, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#052e16';
+        drawText('$', d[0] + 12, d[1] + 19, 19, 'center');
+      }
+
+      for (const h of level.hazards) {
+        ctx.fillStyle = h[2] === 'section' ? '#7c2d12' : '#ef4444';
+        drawRect(h[0], h[1], 42, 42);
+        ctx.fillStyle = 'white';
+        const label = h[2] === 'section' ? '§' : h[2] === 'receipt' ? 'RCPT' : 'FORM';
+        drawText(label, h[0] + 21, h[1] + 27, h[2] === 'section' ? 29 : 11, 'center');
+      }
+
+      for (const hawk of level.hawks) {
+        const center = (hawk.minX + hawk.maxX) / 2;
+        const actualX = center + Math.sin(tick * 0.025 * hawk.speed) * ((hawk.maxX - hawk.minX) / 2);
+        const actualY = hawk.y + Math.sin(tick * 0.04) * 18;
+        drawAuditHawk(actualX, actualY, Math.floor(tick / 12) % 2 === 0);
+      }
+
+      ctx.fillStyle = '#2563eb';
+      drawRect(level.goal[0], level.goal[1], 45, 80);
+      ctx.fillStyle = 'white';
+      drawText('FILE', level.goal[0] + 22, level.goal[1] + 45, 13, 'center');
+
+      if (player.invincible % 10 < 6) {
+        if (selectedCharacter === 'ferret') drawFerretSprite(player.x, player.y);
+        if (selectedCharacter === 'chiweenie') drawChiweenieSprite(player.x, player.y);
+      }
+
+      ctx.fillStyle = '#111827';
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(level.name, 20, 32);
+
+      if (gameOver || gameWon) {
+        ctx.fillStyle = 'rgba(17, 24, 39, .82)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.font = '44px Arial';
+        ctx.fillText(gameWon ? 'Mission Complete!' : 'Audit Overload!', canvas.width / 2, 205);
+        ctx.font = '21px Arial';
+        if (gameWon) {
+          const winner = selectedCharacter === 'ferret' ? 'The Ferret Tax Division thanks you for your service.' : 'The Chiweenie Filing Unit has safely delivered every return.';
+          ctx.fillText(`Final dollars: ${dollars}`, canvas.width / 2, 250);
+          ctx.fillText(winner, canvas.width / 2, 285);
+          ctx.fillText('Press R to play again.', canvas.width / 2, 320);
+        } else {
+          ctx.fillText('Press R to try again.', canvas.width / 2, 250);
+        }
+      }
+    }
+
+    function updateHud() {
+      levelText.textContent = `Level: ${currentLevel + 1} of ${levels.length}`;
+      scoreText.textContent = `Dollars: ${dollars}`;
+      livesText.textContent = `Lives: ${lives}`;
+    }
+
+    function loop() {
+      tick++;
+      if (selectedCharacter && !gameOver && !gameWon) {
+        movePlayer();
+        updatePickupsAndHazards();
+      }
+      updateHud();
+      drawLevel();
+      requestAnimationFrame(loop);
+    }
+
+    resetGame();
+    loop();
+  </script>
+</body>
+</html>
 
