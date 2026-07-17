@@ -1,965 +1,306 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tax Dash</title>
-  <style>
-    * { box-sizing: border-box; }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GRACE | Gross Receipts Aggregation &amp; Control Evaluator</title>
+<style>
+:root{
+  --black:#111;--ink:#171717;--muted:#6a6255;--line:#d8d2c4;--paper:#fff;--off:#fbfaf7;
+  --gold:#c9a227;--gold-soft:#fff7da;--sbt:#fff3a6;--sbt-line:#b69200;
+  --green:#276749;--red:#9b2c2c;--red-soft:#fff5f5;--shadow:0 14px 34px rgba(17,17,17,.055);
+  --serif:Garamond,"EB Garamond",Georgia,serif;--sans:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:12px}
+button{border:1px solid var(--black);border-radius:999px;background:var(--black);color:#fff;padding:8px 13px;font-family:var(--sans);font-size:11px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.secondary{background:var(--paper);color:var(--black)}
+button.gold{background:var(--gold);border-color:var(--gold);color:var(--black)}
+button.ghost{background:var(--paper);color:var(--muted);border-color:var(--line)}
+button.link{border:0;background:transparent;color:var(--muted);text-decoration:underline;padding:7px 0;border-radius:0;white-space:nowrap}
+input,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 9px;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:13px;outline:none}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.16)}
+input[type=number]{appearance:textfield;-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input.invalid,select.invalid{border-color:var(--red)!important;background:var(--red-soft)!important;box-shadow:0 0 0 3px rgba(155,44,44,.12)!important}
+label{display:block;margin:14px 0 7px;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#2b2b2b}
+.hidden{display:none!important}
+header{display:none;padding:13px 22px 11px;border-bottom:3px solid var(--black);background:var(--paper);align-items:center;justify-content:space-between;gap:16px}
+header.active{display:flex}
+header h1{margin:0;font-size:22px;line-height:1.05}.subhead{margin:5px 0 0;color:var(--muted);font-size:12px}.app-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.app-tools button{padding:6px 10px;font-size:10px}
+.foyer{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}.foyer.hidden{display:none}.foyer-card{width:min(780px,100%);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);background:var(--paper);overflow:hidden;position:relative}.acronym-top{position:absolute;top:14px;right:18px;font-family:var(--sans);font-size:8.5px;font-weight:700;letter-spacing:.045em;text-transform:uppercase;color:var(--muted);opacity:.8;white-space:nowrap}.firm-line{text-align:right;max-width:none}.foyer-screen{padding:46px 48px;text-align:center}.hello h2{margin:18px 0 0;font-size:34px;line-height:1.05}.nto-line{margin:6px 0 0;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.grace-acronym{display:block;width:100%;margin-left:auto;margin-right:auto;text-align:center}.foyer-options{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:28px;font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.foyer-link{border:0;border-radius:0;background:transparent;color:var(--black);padding:0;font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.foyer-divider{width:1px;height:18px;background:var(--line)}.how-to-row{margin-top:28px;padding-top:14px;border-top:1px solid var(--line)}.how-to-row button{font-size:10px;padding:7px 12px}
+.copy{margin:0 auto;max-width:650px;text-align:left;border-top:3px solid var(--black);padding-top:18px}.copy h3{margin:0 0 8px;font-size:22px}.copy p{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.42}.credit-name{position:relative;border:0;background:transparent;color:var(--black);padding:0;border-radius:0;font-family:inherit;font-size:inherit;font-weight:inherit;text-decoration:underline;text-decoration-thickness:.06em;text-underline-offset:2px;cursor:pointer}.credit-name:after{content:attr(data-email);display:none;position:absolute;left:50%;bottom:125%;transform:translateX(-50%);white-space:nowrap;background:var(--black);color:#fff;border-radius:6px;padding:5px 7px;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0;text-transform:none;z-index:20}.credit-name:hover:after,.credit-name:focus-visible:after{display:block}.copy-notice{min-height:14px;margin:2px 0 0!important;color:var(--muted)!important;font-family:var(--sans);font-size:10px!important;line-height:1.2!important}.bottom{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.ref{padding:34px 40px;text-align:left;max-height:80vh;overflow:auto}.ref h2{margin:0 0 8px;font-size:24px}.ref p{color:var(--muted);line-height:1.4}.ref table{width:100%;border-collapse:collapse;font-size:11px}.ref th,.ref td{border-bottom:1px solid var(--line);padding:7px 6px;vertical-align:top}.ref th{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left}.source-links{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.source-links a{color:var(--black);text-decoration:underline}
+main{display:none;gap:18px;padding:26px 48px 34px;align-items:flex-start;max-width:1480px;margin:0 auto}main.active{display:flex}.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}.wizard{padding:18px;min-height:430px;width:590px;min-width:540px;max-width:760px;resize:horizontal;overflow:auto;flex:0 0 auto}.right{display:grid;gap:16px;width:100%;min-width:0}.progress{display:flex;gap:7px;margin-bottom:12px}.dot{width:7px;height:7px;border-radius:50%;background:var(--line)}.dot.active{background:var(--gold)}.dot.done{background:var(--black)}.kicker{margin:0 0 7px;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.prompt h2{margin:0 0 10px;font-size:18px;line-height:1.16;white-space:normal}.prompt p{margin:0 0 14px;color:var(--muted);line-height:1.35}.subq{margin:18px 0 10px;font-size:14px;line-height:1.25;font-weight:700}.prompt input,.prompt select{margin-bottom:4px}.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 12px}.choice-row.one{grid-template-columns:1fr}.nav-row{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:22px}.nav-row>div{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.note{margin:12px 0 0;padding:10px 11px;border-left:3px solid var(--gold);background:var(--gold-soft);color:var(--muted);font-size:12px;line-height:1.35}.receipts-header{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;margin:20px 0 4px}.entity-years{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:12px}.year-label{margin:0 0 5px;font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}.threshold-note{max-width:520px;margin:4px auto 0;color:var(--muted);font-family:var(--sans);font-size:11px;text-align:center}.entity-average{margin-top:8px;font-family:var(--sans);font-size:11px;color:var(--muted)}.entity-year-analysis{margin-top:7px;font-family:var(--sans);font-size:10px;line-height:1.35;color:var(--muted);text-align:center}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}.owner-grid{margin-top:10px;display:grid;grid-template-columns:minmax(260px,1.8fr) minmax(150px,1fr);gap:8px 10px;align-items:start}.candidate-owner-grid{margin-top:10px;display:grid;grid-template-columns:minmax(220px,1.4fr) minmax(120px,.8fr) minmax(120px,.8fr);gap:8px 10px;align-items:start}.head{font-family:var(--sans);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase}.callout{margin-top:12px;border:1px solid var(--line);border-left:4px solid var(--gold);background:var(--gold-soft);border-radius:8px;padding:9px;line-height:1.35}.pass{color:var(--green);font-weight:700}.fail{color:var(--red);font-weight:700}.field-error{min-height:14px;color:var(--red);font-family:var(--sans);font-size:10px;font-weight:700;line-height:1.2;margin:0 0 6px;opacity:0}.field-error:not(:empty){opacity:1}.form-error{margin-top:12px;color:var(--red);font-family:var(--sans);font-size:11px;font-weight:700;line-height:1.35}.validation-summary{border-left-color:var(--red);background:var(--red-soft);color:var(--red)}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #111827;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .title {
-      margin: 8px 0 4px;
-      font-size: 25px;
-      letter-spacing: 1px;
-      font-weight: 900;
-    }
-
-    .sub {
-      margin-bottom: 8px;
-      color: #d1d5db;
-      font-size: 13px;
-    }
-
-    .stage {
-      position: relative;
-      width: 900px;
-      height: 480px;
-    }
-
-    canvas {
-      display: block;
-      width: 900px;
-      height: 480px;
-      background: linear-gradient(#93c5fd, #dbeafe 60%, #bbf7d0 60%);
-      border: 4px solid #020617;
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      image-rendering: pixelated;
-    }
-
-    #splash {
-      position: absolute;
-      inset: 4px;
-      z-index: 20;
-      background: linear-gradient(#fff7ed 0%, #fef3c7 52%, #dbeafe 52%, #bbf7d0 100%);
-      color: #111827;
-      border: 4px solid #020617;
-      padding: 16px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    #splash h1 {
-      margin: 0;
-      font-size: 29px;
-      line-height: 1.05;
-      color: #111827;
-      font-weight: 900;
-    }
-
-    #splash h2 {
-      margin: 8px 0 6px;
-      font-size: 22px;
-      color: #991b1b;
-      font-weight: 900;
-    }
-
-    #splash p {
-      margin: 3px 0;
-      font-size: 15px;
-      line-height: 1.25;
-      color: #1f2937;
-      font-weight: 700;
-    }
-
-    .animal-line {
-      width: 720px;
-      height: 54px;
-      margin: 8px 0 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    .line-rule {
-      height: 4px;
-      flex: 1;
-      background: #111827;
-      border-radius: 999px;
-    }
-
-    .ferret-art {
-      position: relative;
-      width: 150px;
-      height: 54px;
-      flex: none;
-    }
-
-    .ferret-art .body {
-      position: absolute;
-      left: 14px;
-      top: 25px;
-      width: 92px;
-      height: 20px;
-      background: #8b5a2b;
-      border: 3px solid #4b2e18;
-      border-radius: 999px;
-    }
-
-    .ferret-art .belly {
-      position: absolute;
-      left: 37px;
-      top: 31px;
-      width: 47px;
-      height: 9px;
-      background: #d6b48c;
-      border-radius: 999px;
-    }
-
-    .ferret-art .tail {
-      position: absolute;
-      left: 0;
-      top: 29px;
-      width: 28px;
-      height: 10px;
-      background: #5c3317;
-      border-radius: 999px;
-      transform: rotate(-18deg);
-    }
-
-    .ferret-art .head {
-      position: absolute;
-      left: 92px;
-      top: 13px;
-      width: 40px;
-      height: 34px;
-      background: #c49a6c;
-      border: 3px solid #4b2e18;
-      border-radius: 50%;
-    }
-
-    .ferret-art .ear1, .ferret-art .ear2 {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      background: #5c3317;
-      border-radius: 50%;
-      top: 8px;
-    }
-
-    .ferret-art .ear1 { left: 97px; }
-    .ferret-art .ear2 { left: 120px; }
-
-    .ferret-art .mask {
-      position: absolute;
-      left: 98px;
-      top: 24px;
-      width: 28px;
-      height: 9px;
-      background: #2f1b0c;
-      border-radius: 999px;
-    }
-
-    .ferret-art .eye1, .ferret-art .eye2 {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: white;
-      border-radius: 50%;
-      top: 26px;
-    }
-
-    .ferret-art .eye1 { left: 103px; }
-    .ferret-art .eye2 { left: 119px; }
-
-    .ferret-art .nose {
-      position: absolute;
-      left: 112px;
-      top: 34px;
-      width: 7px;
-      height: 5px;
-      background: #111827;
-      border-radius: 50%;
-    }
-
-    .ferret-art .leg1, .ferret-art .leg2 {
-      position: absolute;
-      top: 42px;
-      width: 7px;
-      height: 11px;
-      background: #3f2918;
-      border-radius: 4px;
-    }
-
-    .ferret-art .leg1 { left: 40px; }
-    .ferret-art .leg2 { left: 82px; }
-
-    .choose-title {
-      margin: 4px 0 8px;
-      font-size: 23px;
-      color: #111827;
-      font-weight: 900;
-    }
-
-    .choice-row {
-      display: flex;
-      gap: 18px;
-      margin-top: 0;
-    }
-
-    .choice {
-      width: 328px;
-      height: 176px;
-      border: 4px solid #111827;
-      border-radius: 16px;
-      background: white;
-      color: #111827;
-      cursor: pointer;
-      display: grid;
-      grid-template-columns: 138px 1fr;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      font-weight: 900;
-      box-shadow: 0 8px 18px rgba(0,0,0,.25);
-    }
-
-    .choice:hover {
-      transform: translateY(-2px);
-      background: #fef3c7;
-    }
-
-    .choice-title {
-      font-size: 25px;
-      text-align: left;
-      line-height: 1.05;
-    }
-
-    .choice-desc {
-      margin-top: 8px;
-      font-size: 12px;
-      line-height: 1.25;
-      text-align: left;
-      font-weight: 800;
-      color: #374151;
-    }
-
-    .big-ferret {
-      position: relative;
-      width: 136px;
-      height: 142px;
-    }
-
-    .big-ferret .body {
-      position:absolute;
-      left: 4px;
-      top: 61px;
-      width: 91px;
-      height: 27px;
-      background: #8b5a2b;
-      border: 3px solid #4b2e18;
-      border-radius: 999px;
-    }
-
-    .big-ferret .belly {
-      position:absolute;
-      left: 28px;
-      top: 69px;
-      width: 48px;
-      height: 11px;
-      background: #d6b48c;
-      border-radius: 999px;
-    }
-
-    .big-ferret .tail {
-      position:absolute;
-      left: 0;
-      top: 64px;
-      width: 24px;
-      height: 10px;
-      background: #5c3317;
-      border-radius: 999px;
-      transform: rotate(-25deg);
-    }
-
-    .big-ferret .head {
-      position:absolute;
-      left: 75px;
-      top: 31px;
-      width: 48px;
-      height: 45px;
-      background: #c49a6c;
-      border: 3px solid #4b2e18;
-      border-radius: 50%;
-    }
-
-    .big-ferret .ear1, .big-ferret .ear2 {
-      position:absolute;
-      top: 23px;
-      width: 14px;
-      height: 14px;
-      background: #5c3317;
-      border-radius: 50%;
-    }
-
-    .big-ferret .ear1 { left: 82px; }
-    .big-ferret .ear2 { left: 110px; }
-
-    .big-ferret .mask {
-      position:absolute;
-      left: 83px;
-      top: 47px;
-      width: 33px;
-      height: 11px;
-      background: #2f1b0c;
-      border-radius: 999px;
-    }
-
-    .big-ferret .eye1, .big-ferret .eye2 {
-      position:absolute;
-      top: 50px;
-      width: 5px;
-      height: 5px;
-      background: white;
-      border-radius: 50%;
-    }
-
-    .big-ferret .eye1 { left: 89px; }
-    .big-ferret .eye2 { left: 108px; }
-
-    .big-ferret .nose {
-      position:absolute;
-      left: 99px;
-      top: 61px;
-      width: 8px;
-      height: 5px;
-      background: #111827;
-      border-radius: 50%;
-    }
-
-    .big-ferret .leg1, .big-ferret .leg2 {
-      position:absolute;
-      top: 85px;
-      width: 8px;
-      height: 24px;
-      background: #3f2918;
-      border-radius: 4px;
-    }
-
-    .big-ferret .leg1 { left: 31px; }
-    .big-ferret .leg2 { left: 72px; }
-
-    .big-ferret .label {
-      position:absolute;
-      left: 0;
-      top: 115px;
-      width: 136px;
-      font-size: 14px;
-      font-weight: 900;
-      color: #166534;
-      text-align: center;
-    }
-
-    .big-dog {
-      position: relative;
-      width: 136px;
-      height: 142px;
-    }
-
-    .big-dog .body {
-      position:absolute;
-      left: 10px;
-      top: 65px;
-      width: 86px;
-      height: 30px;
-      background: #9a5a22;
-      border: 3px solid #4a1d0b;
-      border-radius: 999px;
-    }
-
-    .big-dog .chest {
-      position:absolute;
-      left: 70px;
-      top: 70px;
-      width: 23px;
-      height: 18px;
-      background: #facc15;
-      border-radius: 50%;
-    }
-
-    .big-dog .head {
-      position:absolute;
-      left: 78px;
-      top: 35px;
-      width: 45px;
-      height: 45px;
-      background: #9a5a22;
-      border: 3px solid #4a1d0b;
-      border-radius: 45% 45% 50% 50%;
-    }
-
-    .big-dog .ear1, .big-dog .ear2 {
-      position:absolute;
-      top: 34px;
-      width: 21px;
-      height: 36px;
-      background: #4a1d0b;
-      border-radius: 999px;
-    }
-
-    .big-dog .ear1 { left: 68px; transform: rotate(24deg); }
-    .big-dog .ear2 { left: 111px; transform: rotate(-24deg); }
-
-    .big-dog .muzzle {
-      position:absolute;
-      left: 91px;
-      top: 58px;
-      width: 22px;
-      height: 14px;
-      background: #facc15;
-      border-radius: 999px;
-    }
-
-    .big-dog .eye1, .big-dog .eye2 {
-      position:absolute;
-      top: 51px;
-      width: 5px;
-      height: 5px;
-      background: #111827;
-      border-radius: 50%;
-    }
-
-    .big-dog .eye1 { left: 90px; }
-    .big-dog .eye2 { left: 108px; }
-
-    .big-dog .nose {
-      position:absolute;
-      left: 101px;
-      top: 64px;
-      width: 7px;
-      height: 5px;
-      background: #111827;
-      border-radius: 50%;
-    }
-
-    .big-dog .tail {
-      position:absolute;
-      left: 0;
-      top: 66px;
-      width: 21px;
-      height: 9px;
-      background: #4a1d0b;
-      border-radius: 999px;
-      transform: rotate(-30deg);
-    }
-
-    .big-dog .leg1, .big-dog .leg2 {
-      position:absolute;
-      top: 92px;
-      width: 8px;
-      height: 22px;
-      background: #4a1d0b;
-      border-radius: 4px;
-    }
-
-    .big-dog .leg1 { left: 31px; }
-    .big-dog .leg2 { left: 71px; }
-
-    .big-dog .label {
-      position:absolute;
-      left: 0;
-      top: 118px;
-      width: 136px;
-      font-size: 13px;
-      font-weight: 900;
-      color: #1d4ed8;
-      text-align: center;
-    }
-
-    .corner-chiweenie {
-      position: absolute;
-      right: 12px;
-      bottom: 5px;
-      transform: scale(.58);
-      transform-origin: right bottom;
-    }
-
-    .hud {
-      width: 900px;
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      color: #f9fafb;
-      font-size: 15px;
-    }
-
-    .help {
-      width: 900px;
-      color: #d1d5db;
-      font-size: 13px;
-      margin-top: 8px;
-      text-align: center;
-    }
-  </style>
+.receipt-meta{margin:10px 0 0}.receipt-rule-note{margin-top:8px}.year-card select.receipt-status{font-size:11px;margin-bottom:6px}.year-card input:disabled{background:#f7f4ec;color:#8a8172}.month-field{margin-top:4px}.month-field label{margin-top:8px;font-size:8.5px}.receipt-line small{display:block;color:var(--muted);font-family:var(--sans);font-size:9px;font-weight:400;margin-top:2px}
+.ownership-tests{margin-top:8px}.ownership-tests .test-line{padding:3px 0}.ownership-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px;background:rgba(255,255,255,.45)}.ownership-table th,.ownership-table td{border-bottom:1px solid rgba(17,17,17,.12);padding:4px 5px;text-align:right}.ownership-table th:first-child,.ownership-table td:first-child{text-align:left}.ownership-table th{font-family:var(--sans);font-size:8.5px;text-transform:uppercase;letter-spacing:.045em;color:var(--muted)}.result-banner{margin-top:8px;padding-top:7px;border-top:1px solid rgba(17,17,17,.16)}.locked-field{background:#f7f4ec!important;color:var(--muted)!important;cursor:not-allowed}.locked-note{margin-top:8px;color:var(--muted);font-family:var(--sans);font-size:10px;line-height:1.3}
+@keyframes redFlash{0%{background:#fff;color:var(--red)}30%{background:#ffe1e1;color:#721c1c}100%{background:transparent;color:var(--red)}}.flash-error{animation:redFlash .9s ease}
+.scale,.summary{padding:14px}.scale-top,.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}.scale h2,.chart-head h2,.summary h2{margin:0;font-size:17px}.bar{height:20px;border:1px solid var(--black);border-radius:999px;overflow:hidden;background:#f3f3f3}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),#d18b00,var(--red));transition:width .22s ease}.receipt-list{margin-top:10px;display:grid;gap:4px}.receipt-line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dotted var(--line);padding-bottom:4px;font-size:12px}.summary ul{margin:8px 0 0;padding-left:18px;line-height:1.5}
+.chart-card{padding:14px;overflow:hidden;contain:layout paint}.map-tools{display:flex;gap:6px;align-items:center}.map-tools button{padding:5px 9px;font-size:10px;background:var(--paper);color:var(--black);border:1px solid var(--line)}.map{position:relative;height:720px;width:100%;min-width:0;background:var(--off);border:1px solid #eee7d8;border-radius:10px;overflow:hidden;isolation:isolate;cursor:grab;touch-action:none}.map:active{cursor:grabbing}.map-stage{position:absolute;left:0;top:0;width:1180px;height:760px;transform-origin:0 0;will-change:transform}svg.lines{position:absolute;inset:0;width:1180px;height:760px;z-index:1;pointer-events:none;overflow:visible}.node{-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;position:absolute;width:260px;min-height:108px;padding:20px 22px;border:1.5px solid var(--black);border-radius:4px;background:var(--paper);color:var(--ink);display:none;align-items:center;justify-content:center;text-align:center;line-height:1.18;font-size:13px;box-shadow:0 4px 10px rgba(17,17,17,.07);z-index:2;isolation:isolate;overflow:visible;flex-direction:column}.node .node-name{display:block;width:100%;line-height:1.22;margin-bottom:11px;font-weight:700;overflow-wrap:normal;word-break:normal;hyphens:none;position:relative;z-index:2}.node .s-badge{position:absolute;left:0;bottom:0;width:26px;height:26px;border:2px solid #7356a5;background:#fff;color:#4d367c;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:15px;font-weight:800;line-height:1;z-index:5}.node .node-amount{display:block;width:100%;padding-top:10px;border-top:1px solid rgba(17,17,17,.16);color:var(--muted);font-family:var(--sans);font-size:11px;font-weight:700;line-height:1.28;position:relative;z-index:2}.sbt{background:var(--sbt)!important;border:3px solid var(--sbt-line)!important;font-weight:700;z-index:3}.parent{background:#f4f1e8}.sub{background:#f4f1e8}.owners{background:#fffdf3;border-color:#b69200}.bs{background:#eadcf3;border-color:#7e5aa8}.bs.included{background:#f0fff4;border-color:var(--green)}.bs.excluded{background:#fff5f5;border-color:var(--red)}
+.entity-c-corp,.entity-s-corp{border-radius:4px!important;clip-path:none!important}.entity-c-corp{background:#e7eefc!important;border-color:#526aa3!important}.entity-s-corp{background:#eee8fb!important;border-color:#7356a5!important;position:absolute}.entity-s-corp:after{content:"S";position:absolute;left:0;bottom:0;width:24px;height:24px;border:2px solid #7356a5;background:#fff;color:#4d367c;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:14px;font-weight:800;line-height:1;z-index:3}.entity-llc{border-radius:18px!important;background:#e8f7fb!important;border-color:#4d8795!important}.entity-individual{width:156px;height:156px;min-height:156px;border-radius:50%!important;background:#f7f0df!important;border-color:#9a7a2f!important}.entity-partnership,.entity-trust,.entity-estate{border:0!important;background:transparent!important;box-shadow:none!important;clip-path:none!important}.entity-partnership{width:280px;min-height:178px;padding:72px 42px 26px}.entity-partnership:before{content:"";position:absolute;inset:0;z-index:0;clip-path:polygon(50% 0,100% 100%,0 100%);background:#b99000;filter:drop-shadow(0 5px 12px rgba(17,17,17,.08))}.entity-partnership:after{content:"";position:absolute;inset:4px;z-index:1;clip-path:polygon(50% 0,100% 100%,0 100%);background:#fff0b8;pointer-events:none}.entity-trust{width:300px;min-height:198px;padding:52px 72px}.entity-trust:before{content:"";position:absolute;inset:0;z-index:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:#7fae82;filter:drop-shadow(0 5px 12px rgba(17,17,17,.08))}.entity-trust:after{content:"";position:absolute;inset:4px;z-index:1;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:#eaf7e8;pointer-events:none}.entity-estate{width:280px;min-height:138px;padding:34px 58px}.entity-estate:before{content:"";position:absolute;inset:0;z-index:0;clip-path:polygon(20% 0,80% 0,100% 50%,80% 100%,20% 100%,0 50%);background:#8e7bb3;filter:drop-shadow(0 5px 12px rgba(17,17,17,.08))}.entity-estate:after{content:"";position:absolute;inset:4px;z-index:1;clip-path:polygon(20% 0,80% 0,100% 50%,80% 100%,20% 100%,0 50%);background:#f0edf7;pointer-events:none}.entity-other{background:#fff!important;border-color:#444!important}
+.node.sbt.entity-c-corp,.node.sbt.entity-s-corp,.node.sbt.entity-llc,.node.sbt.entity-individual{background:var(--sbt)!important;border-color:var(--sbt-line)!important}.node.sbt.entity-partnership:before,.node.sbt.entity-trust:before,.node.sbt.entity-estate:before{background:var(--sbt-line)!important}.node.sbt.entity-partnership:after,.node.sbt.entity-trust:after,.node.sbt.entity-estate:after{background:var(--sbt)!important}.node.sbt .node-amount{border-top-color:rgba(120,88,0,.25)!important}
+.disclaimer-overlay{position:fixed;inset:0;background:rgba(17,17,17,.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px}.disclaimer-box{width:min(660px,100%);background:var(--paper);border:2px solid var(--black);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.24);padding:26px;text-align:left}.disclaimer-box h2{margin:0 0 8px;font-size:23px}.disclaimer-box p{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.42}.disclaimer-check{display:flex;gap:10px;align-items:flex-start;margin:14px 0}.disclaimer-check input{width:auto;margin-top:2px}.disclaimer-check label{margin:0;text-transform:none;letter-spacing:0;font-size:12px;line-height:1.35;color:var(--ink)}body.app-blurred header.active,body.app-blurred main.active{filter:blur(3px);pointer-events:none;user-select:none}
+.tour-overlay{position:fixed;inset:0;z-index:45;pointer-events:none}.tour-shade{position:absolute;inset:0;background:rgba(17,17,17,.28)}.tour-highlight{position:absolute;border:3px solid var(--gold);border-radius:12px;box-shadow:0 0 0 9999px rgba(17,17,17,.28),0 10px 28px rgba(0,0,0,.22);transition:all .18s ease;pointer-events:none}.tour-card{position:absolute;width:min(340px,calc(100vw - 40px));background:var(--paper);border:2px solid var(--black);border-radius:12px;box-shadow:0 20px 54px rgba(0,0,0,.25);padding:16px;pointer-events:auto}.tour-card h3{margin:0 0 6px;font-size:18px}.tour-card p{margin:0 0 12px;color:var(--muted);line-height:1.35}.tour-card .tour-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.tour-count{font-family:var(--sans);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.prototype-v1-footer{position:fixed;right:9px;bottom:5px;z-index:10;background:transparent;color:var(--muted);border:0;font-family:var(--sans);font-size:6px;font-weight:400;letter-spacing:.14em;text-align:right;text-transform:uppercase;padding:0;box-shadow:none;opacity:.16;pointer-events:none}
+@media(max-width:980px){header.active{display:block}.app-tools{justify-content:flex-start;margin-top:10px}main.active{display:grid}main{padding:14px}.wizard{width:auto;min-width:0;max-width:none;resize:none}.right{min-width:0}.entity-years,.two-col{grid-template-columns:1fr}.owner-grid,.candidate-owner-grid{grid-template-columns:1fr}.head{display:none}}
+</style>
 </head>
 <body>
-  <div class="title">Tax Dash</div>
-  <div class="sub">A temporary tax arcade mission while Grace gets rebuilt.</div>
-
-  <div class="stage">
-    <canvas id="game" width="900" height="480"></canvas>
-
-    <div id="splash">
-      <h1>⚠️ GRACE IS CURRENTLY UNDER CONSTRUCTION ⚠️</h1>
-      <h2>SHE RETURNS JUNE 4.</h2>
-      <p>In the meantime, please enjoy this very serious tax arcade game.</p>
-      <p>Collect dollars, avoid paperwork, dodge the incoming audit hawk, and make it to filing day.</p>
-
-      <div class="animal-line" aria-hidden="true">
-        <span class="line-rule"></span>
-        <div class="ferret-art">
-          <span class="tail"></span><span class="body"></span><span class="belly"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="mask"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span>
-        </div>
-        <span class="line-rule"></span>
-      </div>
-
-      <div class="choose-title">CHOOSE YOUR AGENT</div>
-      <div class="choice-row">
-        <button class="choice" type="button" onclick="selectCharacter('ferret')">
-          <div class="big-ferret" aria-label="Ferret">
-            <span class="tail"></span><span class="body"></span><span class="belly"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="mask"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span><span class="label">FERRET</span>
-          </div>
-          <div>
-            <div class="choice-title">PLAY AS FERRET</div>
-            <div class="choice-desc">Long body, mask face, tiny legs. Higher jump.</div>
-          </div>
-        </button>
-
-        <button class="choice" type="button" onclick="selectCharacter('chiweenie')">
-          <div class="big-dog" aria-label="Chiweenie">
-            <span class="tail"></span><span class="body"></span><span class="chest"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="muzzle"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span><span class="label">CHIWEENIE</span>
-          </div>
-          <div>
-            <div class="choice-title">PLAY AS CHIWEENIE</div>
-            <div class="choice-desc">Small long dog, big ears, tiny legs. Faster sprint.</div>
-          </div>
-        </button>
-      </div>
-
-      <div class="corner-chiweenie big-dog" aria-label="Chiweenie decoration">
-        <span class="tail"></span><span class="body"></span><span class="chest"></span><span class="ear1"></span><span class="ear2"></span><span class="head"></span><span class="muzzle"></span><span class="eye1"></span><span class="eye2"></span><span class="nose"></span><span class="leg1"></span><span class="leg2"></span><span class="label">CHIWEENIE</span>
-      </div>
+<header id="appHeader">
+  <div><h1>GRACE</h1><p class="subhead">Gross Receipts Aggregation &amp; Control Evaluator</p></div>
+  <div class="app-tools">
+    <button class="secondary" type="button" onclick="exportState()">Export PDF</button>
+  </div>
+</header>
+<section class="foyer" id="foyer">
+  <div class="foyer-card">
+    <div class="acronym-top firm-line">Eisner Advisory Group LLC · National Tax Office · Accounting Methods &amp; Periods</div>
+    <div class="foyer-screen" id="introScreen">
+      <div class="hello"><h2>Hi, I’m GRACE.</h2><p class="nto-line grace-acronym">Gross Receipts Aggregation &amp; Control Evaluator</p></div>
+      <div class="foyer-options"><button class="foyer-link" type="button" onclick="showBackground()">Background</button><span class="foyer-divider"></span><button class="foyer-link" type="button" onclick="showIntake()">Get started</button></div>
+      <div class="how-to-row"><button class="secondary" type="button" onclick="startHowToUse()">How to use</button></div>
+    </div>
+    <div class="foyer-screen hidden" id="backgroundScreen">
+      <div class="copy"><h3>Background</h3><p><strong>GRACE</strong> means <strong>Gross Receipts Aggregation &amp; Control Evaluator</strong>.</p><p>GRACE helps teams calculate average gross receipts, evaluate ownership and control relationships, and document the result.</p>
+      <p><strong>Developed by <button class="credit-name" type="button" data-email="jaime.garciadeparedes@eisneramper.com" title="jaime.garciadeparedes@eisneramper.com" onclick="copyEmail(this)">Jaime Garcia de Paredes</button> and <button class="credit-name" type="button" data-email="briauna.williams-henderson@eisneramper.com" title="briauna.williams-henderson@eisneramper.com" onclick="copyEmail(this)">Briauna Williams-Henderson</button>.</strong></p><p id="copyNotice" class="copy-notice" aria-live="polite"></p></div>
+      <div class="bottom"><button class="secondary" type="button" onclick="showIntro()">Back</button><button class="gold" type="button" onclick="showIntake()">Continue</button></div>
+    </div>
+    <div class="foyer-screen hidden ref" id="referenceScreen">
+      <h2>Gross receipts reference</h2><p>Use this table as a locator. Some entries are gross amounts; others are net or pass-through lines that may require supporting detail.</p>
+      <table><thead><tr><th>Item</th><th>Include</th><th>1120</th><th>1120-S</th><th>1065</th><th>1040</th><th>1041</th></tr></thead><tbody><tr><td>Sales</td><td>Sales receipts, net of returns and allowances and before COGS.</td><td>Lines 1a, 1b, 1c</td><td>Lines 1a, 1b, 1c</td><td>Lines 1a, 1b, 1c</td><td>Schedule C, lines 1 to 3</td><td>Line 3 with attached business schedule, if applicable</td></tr><tr><td>Services</td><td>Gross service receipts.</td><td>Line 1a/1c if operating receipts; otherwise line 10/detail</td><td>Line 1a/1c if operating receipts; otherwise Schedule K/detail</td><td>Line 1a/1c if operating receipts; otherwise Schedule K/detail</td><td>Schedule C, line 1</td><td>Line 3 with attached business schedule, if applicable</td></tr><tr><td>Interest</td><td>Interest income.</td><td>Line 5</td><td>Schedule K, line 4</td><td>Schedule K, line 5</td><td>Form 1040, line 2b</td><td>Line 1</td></tr><tr><td>Dividends</td><td>Dividends; qualified dividends are a subset, not an add-on.</td><td>Line 4, Schedule C detail</td><td>Schedule K, line 5a; 5b is subset</td><td>Schedule K, line 6a; 6b is subset</td><td>Line 3b; 3a is subset</td><td>Line 2a; 2b is subset</td></tr><tr><td>Rents</td><td>Gross rents; use supporting detail where forms report net rental amounts.</td><td>Line 6</td><td>Form 8825 and Schedule K line 2 for rental real estate; Schedule K line 3 for other rental activity/detail</td><td>Form 8825 and Schedule K line 2 for rental real estate; Schedule K line 3a for other gross rental income and 3c for other net rental income</td><td>Schedule E, line 3</td><td>Line 5 with Schedule E/detail</td></tr><tr><td>Royalties</td><td>Gross royalties.</td><td>Line 7</td><td>Schedule K, line 6</td><td>Schedule K, line 7</td><td>Schedule E, line 4</td><td>Line 5 with Schedule E/detail</td></tr><tr><td>Annuities</td><td>Annuity income, where applicable; reporting location depends on the facts.</td><td>Line 10 or statement</td><td>Schedule K other income or statement</td><td>Schedule K other income or statement</td><td>Form 1040, lines 5a and 5b</td><td>Line 8 or supporting detail</td></tr><tr><td>Gains</td><td>Applicable investment and business-asset gains; main-form lines often report net gain and may require detail.</td><td>Lines 8 and 9</td><td>Schedule K capital gain lines and line 9 for section 1231/Form 4797</td><td>Schedule K capital gain lines and line 10 for section 1231/Form 4797</td><td>Schedule D / Form 4797</td><td>Lines 4 and 7 with backup detail</td></tr><tr><td>Other income</td><td>Incidental and nonordinary-course income.</td><td>Line 10</td><td>Page 1 if ordinary; Schedule K line 10 if separately stated</td><td>Page 1 if ordinary; Schedule K line 11 if separately stated</td><td>Schedule 1, line 8 series</td><td>Line 8</td></tr></tbody></table>
+      <div class="source-links"><a href="https://www.irs.gov/forms-pubs/about-form-1120" target="_blank">Form 1120</a><a href="https://www.irs.gov/forms-pubs/about-form-1120-s" target="_blank">Form 1120-S</a><a href="https://www.irs.gov/forms-pubs/about-form-1065" target="_blank">Form 1065</a><a href="https://www.irs.gov/forms-pubs/about-form-1040" target="_blank">Form 1040</a><a href="https://www.irs.gov/forms-pubs/about-form-1041" target="_blank">Form 1041</a></div>
+      <div class="bottom"><button class="secondary" type="button" onclick="showIntro()">Back</button><button class="gold" type="button" onclick="showIntake()">Continue</button></div>
     </div>
   </div>
-
-  <div class="hud">
-    <div id="levelText">Level: 1</div>
-    <div id="scoreText">Dollars: 0</div>
-    <div id="livesText">Lives: 3</div>
+</section>
+<main id="app">
+  <section class="card wizard" data-tour="wizard"><div class="progress" id="progress"></div><div class="prompt" id="prompt"></div></section>
+  <section class="right">
+    <div class="card scale" data-tour="scale"><div class="scale-top"><h2>Receipts scale</h2><strong id="scaleStatus"></strong></div><div class="bar"><div class="fill" id="fill"></div></div><div class="receipt-list" id="receiptList"></div></div>
+    <div class="card chart-card" data-tour="map"><div class="chart-head"><h2>Aggregation map</h2><div class="map-tools"><button type="button" onclick="zoomMap(.9)">−</button><button type="button" onclick="fitMap()">Fit</button><button type="button" onclick="zoomMap(1.1)">+</button></div></div><div class="map" id="map"><div class="map-stage" id="mapStage"><svg class="lines" id="lines" viewBox="0 0 1180 760" preserveAspectRatio="none"></svg><div id="upstreamNodes"></div><div class="node sbt" id="sbtNode"></div><div id="downstreamNodes"></div><div class="node owners" id="ownersNode"></div><div id="candidateNodes"></div></div></div></div>
+    <div class="card summary" data-tour="trail"><h2>Decision trail</h2><ul id="trail"></ul></div>
+  </section>
+</main>
+<div id="disclaimerOverlay" class="disclaimer-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
+  <div class="disclaimer-box">
+    <h2 id="disclaimerTitle">Notice and Disclaimer</h2>
+    <p><strong>CONFIDENTIAL AND PROPRIETARY.</strong> © 2026 Eisner Advisory Group LLC. All rights reserved. GRACE is intended only for authorized internal use.</p>
+    <p>“EisnerAmper” is the brand name under which EisnerAmper LLP and Eisner Advisory Group LLC provide professional services. Eisner Advisory Group LLC and its subsidiary entities are not licensed CPA firms and do not provide attest services.</p>
+    <p>GRACE provides an estimate based solely on user-entered facts and is not tax, legal, accounting, penalty-protection, transaction, or other professional advice. It is not a final deliverable.</p>
+    <p>Any tax information generated by GRACE is not intended or written to be used, and cannot be used, for avoiding penalties imposed by the Internal Revenue Code or for promoting, marketing, or recommending any transaction.</p>
+    <p>Results may be incomplete or inaccurate due to omitted facts, exceptions, authorities, or changes in law and must be reviewed by an experienced tax advisor before use or reliance.</p>
+    <div class="disclaimer-check"><input id="disclaimerCheck" type="checkbox" onchange="toggleDisclaimerAccept()"><label for="disclaimerCheck">I acknowledge this confidential and proprietary notice and agree that GRACE is not tax advice and must be independently reviewed before use.</label></div>
+    <div class="bottom"><button class="secondary" type="button" onclick="declineDisclaimer()">Back</button><button id="disclaimerAccept" class="gold" type="button" onclick="acceptDisclaimer()" disabled>Agree and continue</button></div>
   </div>
-  <div class="help">Move: Arrow Keys or A/D. Jump: Space, Arrow Up, or W. Restart after win/loss: R.</div>
+</div>
+<div id="tourOverlay" class="tour-overlay hidden" aria-live="polite">
+  <div class="tour-shade"></div><div id="tourHighlight" class="tour-highlight"></div><div id="tourCard" class="tour-card"><div class="tour-count" id="tourCount"></div><h3 id="tourTitle"></h3><p id="tourBody"></p><div class="tour-actions"><button class="secondary" type="button" onclick="skipTour()">Skip</button><button class="gold" type="button" onclick="nextTourStep()" id="tourNext">Next</button></div></div>
+</div>
+<div id="prototypeV1Footer" class="prototype-v1-footer">PROTOTYPE V1</div>
+<script>
+const $=id=>document.getElementById(id);
+const money=n=>Number(n||0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+const THRESHOLDS={2018:25000000,2019:26000000,2020:26000000,2021:26000000,2022:27000000,2023:29000000,2024:30000000,2025:31000000,2026:32000000};
+const LATEST_THRESHOLD_YEAR=Math.max(...Object.keys(THRESHOLDS).map(Number));
+const steps=['Receipts','Upstream','Common owners','Downstream','Candidate','Review'];
+const mapState={scale:1,x:0,y:0,dragging:false,startX:0,startY:0,baseX:0,baseY:0};
+let pendingTour=false,tourIndex=0,lineFrame=null;
+const defaultReceiptMeta=()=>({operationPeriod:'full',monthsInOperation:36,status1:'full',status2:'full',status3:'full',months1:12,months2:12,months3:12});
+const defaultOwners=()=>['A','B','C','D','E'].map(name=>({name,anchor:null,cand:null}));
+const makeEntity=(name,type='c-corp')=>({name,type,y1:null,y2:null,y3:null,...defaultReceiptMeta()});
+const makeCandidate=(n=1,owners=null)=>({name:`Potential Brother-Sister ${n}`,type:'s-corp',y1:null,y2:null,y3:null,...defaultReceiptMeta(),owners:(owners&&owners.length?owners:defaultOwners()).map(o=>({name:o.name||'?',anchor:hasValue(o.anchor)?Number(o.anchor):hasValue(o.pct)?Number(o.pct):null,cand:hasValue(o.cand)?Number(o.cand):null}))});
+const state={step:0,taxYear:2025,sbtName:'Candidate SBT',sbtType:'c-corp',y1:null,y2:null,y3:null,...defaultReceiptMeta(),upstreamChain:[],upstreamDraft:null,upstreamClosed:false,upstreamTermination:null,ownerCount:0,ownerNames:[],ownerLabel:'Common owners',hasOwners:null,downstreamChain:[],downstreamDraft:null,downstreamClosed:false,candidates:[],currentCandidate:null};
+state.currentCandidate=makeCandidate(1);
+const tourSteps=[
+  {selector:'[data-tour="wizard"]',title:'1. Resolve upstream first',body:'GRACE completes the ownership chain above the SBT before considering downstream entities or brother-sister candidates.'},
+  {selector:'#prompt .entity-years',title:'2. Analyze each lookback year',body:'Classify each lookback year as full, short, or not in existence. GRACE annualizes short taxable years before computing the average.'},
+  {selector:'[data-tour="scale"]',title:'3. Monitor the receipts scale',body:'The bar updates as entities are included and compares the aggregated average with the selected tax-year threshold.'},
+  {selector:'[data-tour="map"]',title:'4. Read the aggregation map',body:'The map shows the upstream chain, SBT, downstream chain, common owners, and each brother-sister candidate. Drag, zoom, or select Fit.'},
+  {selector:'[data-tour="trail"]',title:'5. Review the trail and export',body:'Use the decision trail to review the result. Select Export PDF to save a local PDF copy of the current intake.'}
+];
+function esc(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function hasValue(v){return v!==null&&v!==undefined&&v!==''&&!Number.isNaN(Number(v));}
+function inputValue(v){return hasValue(v)?String(v):'';}
+function numericValue(el){if(!el||String(el.value).trim()==='')return null;const n=Number(String(el.value).replace(/,/g,''));return Number.isFinite(n)?n:null;}
+function normalizeMonths(v){const n=Number(v);return Number.isFinite(n)?n:null;}
+function inferMonthsFromLegacyStatus(e){if(!e)return 36;let months=0;let sawLegacy=false;[1,2,3].forEach(n=>{const st=e[`status${n}`];if(st){sawLegacy=true;if(st==='full')months+=12;else if(st==='short'){const m=Number(e[`months${n}`]);months+=Number.isFinite(m)?m:0;}}});return sawLegacy?months:36;}
+function applyTotalMonthsAsYearStatuses(e,total){let remaining=Math.max(0,Math.min(36,Number(total)||0));[1,2,3].forEach(n=>{e[`status${n}`]='none';e[`months${n}`]=0;});[3,2,1].forEach(n=>{if(remaining>=12){e[`status${n}`]='full';e[`months${n}`]=12;remaining-=12;}else if(remaining>0){e[`status${n}`]='short';e[`months${n}`]=remaining;remaining=0;}});}
+function hasYearStatus(e){return [1,2,3].some(n=>['full','short','none'].includes(e?.[`status${n}`]));}
+function normalizeYearStatus(e,n){let st=e[`status${n}`];if(!['full','short','none'].includes(st))st='full';e[`status${n}`]=st;if(st==='full')e[`months${n}`]=12;else if(st==='none')e[`months${n}`]=0;else{const m=normalizeMonths(e[`months${n}`]);e[`months${n}`]=Number.isFinite(Number(m))?m:null;}}
+function ensureReceiptMeta(e){if(!e)return e;if(!hasYearStatus(e)){if(e.operationPeriod==='partial'){applyTotalMonthsAsYearStatuses(e,hasValue(e.monthsInOperation)?e.monthsInOperation:0);}else{[1,2,3].forEach(n=>{e[`status${n}`]='full';e[`months${n}`]=12;});}}[1,2,3].forEach(n=>normalizeYearStatus(e,n));const total=[1,2,3].reduce((s,n)=>s+Number(e[`months${n}`]||0),0);e.monthsInOperation=total;e.operationPeriod=total>=36?'full':'partial';return e;}
+function receiptYears(){const y=Number(state.taxYear)||2025;return [y-3,y-2,y-1];}
+function currentThreshold(){return THRESHOLDS[state.taxYear]||THRESHOLDS[LATEST_THRESHOLD_YEAR];}
+function thresholdNote(){if(THRESHOLDS[state.taxYear])return `Threshold for tax year beginning ${state.taxYear}: ${money(currentThreshold())}.`;return `No indexed threshold is loaded for ${state.taxYear}; using the latest loaded threshold (${LATEST_THRESHOLD_YEAR}): ${money(currentThreshold())}.`;}
+function yearStatus(e,n){ensureReceiptMeta(e);return e[`status${n}`]||'full';}
+function yearMonths(e,n){ensureReceiptMeta(e);const st=yearStatus(e,n);if(st==='full')return 12;if(st==='none')return 0;return normalizeMonths(e[`months${n}`]);}
+function activeReceiptYears(e){ensureReceiptMeta(e);return [1,2,3].filter(n=>yearStatus(e,n)!=='none');}
+function operationMonths(e){ensureReceiptMeta(e);return [1,2,3].reduce((s,n)=>s+Number(yearMonths(e,n)||0),0);}
+function fullLookback(e){ensureReceiptMeta(e);return [1,2,3].every(n=>yearStatus(e,n)==='full');}
+function totalReceipt(e){ensureReceiptMeta(e);return [1,2,3].reduce((s,n)=>s+(yearStatus(e,n)==='none'?0:Number(e[`y${n}`]||0)),0);}
+function annualizedReceipt(e,n){ensureReceiptMeta(e);const st=yearStatus(e,n),raw=Number(e[`y${n}`]||0);if(st==='none')return 0;if(st==='full')return raw;const m=Number(yearMonths(e,n));return Number.isFinite(m)&&m>0?raw*12/m:0;}
+function annualizedReceiptTotal(e){ensureReceiptMeta(e);return [1,2,3].reduce((s,n)=>s+annualizedReceipt(e,n),0);}
+function entityAvg(e){ensureReceiptMeta(e);const active=activeReceiptYears(e).length;if(active<=0)return 0;return annualizedReceiptTotal(e)/active;}
+function receiptYearLabel(e,n,year){const st=yearStatus(e,n);if(st==='full')return `${year}: full year`;if(st==='none')return `${year}: not in existence`;const m=yearMonths(e,n);return `${year}: short year${hasValue(m)?` (${m} month${Number(m)===1?'':'s'}, annualized)`:''}`;}
+function receiptYearAnalysis(e){ensureReceiptMeta(e);const years=receiptYears();return [1,2,3].map((n,i)=>receiptYearLabel(e,n,years[i])).join(' · ');}
+function receiptPeriodSummary(e){ensureReceiptMeta(e);if(fullLookback(e))return '3 full lookback years';const active=activeReceiptYears(e).length,m=operationMonths(e),hasShort=[1,2,3].some(n=>yearStatus(e,n)==='short');if(active===0)return 'no prior lookback year in operation';return `${active} lookback year${active===1?'':'s'} included; ${m} month${Number(m)===1?'':'s'} in operation${hasShort?'; short years annualized':''}`;}
+function averageLine(e,label){return `${label} average: ${money(entityAvg(e))} (${receiptPeriodSummary(e)})`;}
+function sbtAverage(){return entityAvg(state);}
+function candidateAverage(c){return entityAvg(c);}
+function receiptMetaFor(e){ensureReceiptMeta(e);return {operationPeriod:e.operationPeriod,monthsInOperation:e.monthsInOperation,status1:e.status1,status2:e.status2,status3:e.status3,months1:e.months1,months2:e.months2,months3:e.months3};}
+function sbtEntity(){ensureReceiptMeta(state);return {name:state.sbtName||'Candidate SBT',type:state.sbtType,y1:state.y1,y2:state.y2,y3:state.y3,...receiptMetaFor(state)};}
+function currentUpstreamTopEntity(){return state.upstreamChain.length ? state.upstreamChain[state.upstreamChain.length-1] : sbtEntity();}
+function downstreamBottomEntity(){return state.downstreamChain.length ? state.downstreamChain[state.downstreamChain.length-1] : sbtEntity();}
+function commonOwnerAnchorEntity(){return currentUpstreamTopEntity();}
+function commonOwnerAnchorName(){return commonOwnerAnchorEntity().name || 'anchor entity';}
+function ownerLabel(){return state.ownerLabel || state.ownerNames.map(o=>o.name).filter(Boolean).join(' / ') || 'Common owners';}
+function entityForPrefix(prefix){if(prefix==='sbt')return state;if(prefix==='cand')return state.currentCandidate;if(prefix==='upstreamDraft')return state.upstreamDraft;if(prefix==='downstreamDraft')return state.downstreamDraft;return null;}
+function saveReceiptFields(prefix,e){if(!e)return;ensureReceiptMeta(e);[1,2,3].forEach(n=>{const statusEl=$(`${prefix}Status${n}`);if(statusEl)e[`status${n}`]=statusEl.value;const monthEl=$(`${prefix}Months${n}`);if(monthEl)e[`months${n}`]=numericValue(monthEl);const y=$(`${prefix}Y${n}`);if(y)e[`y${n}`]=numericValue(y);if(e[`status${n}`]==='full')e[`months${n}`]=12;if(e[`status${n}`]==='none'){e[`months${n}`]=0;e[`y${n}`]=null;}});ensureReceiptMeta(e);}
+function setOperationPeriod(prefix,value){const e=entityForPrefix(prefix);if(!e)return;ensureReceiptMeta(e);if(value==='full')applyTotalMonthsAsYearStatuses(e,36);else applyTotalMonthsAsYearStatuses(e,hasValue(e.monthsInOperation)?e.monthsInOperation:0);clearFormError();render();}
+function updateMonthsInOperation(prefix,el){const e=entityForPrefix(prefix);if(e){applyTotalMonthsAsYearStatuses(e,numericValue(el));}clearFieldError(el.id);liveUpdate();}
+function setYearStatus(prefix,n,value){const e=entityForPrefix(prefix);if(!e)return;ensureReceiptMeta(e);e[`status${n}`]=value;if(value==='full')e[`months${n}`]=12;else if(value==='none'){e[`months${n}`]=0;e[`y${n}`]=null;}else if(!hasValue(e[`months${n}`])||Number(e[`months${n}`])>=12)e[`months${n}`]=null;clearFieldError(`${prefix}Status${n}`);clearFieldError(`${prefix}Months${n}`);clearFieldError(`${prefix}Y${n}`);clearFormError();render();}
+function updateYearMonths(prefix,n,el){const e=entityForPrefix(prefix);if(e)e[`months${n}`]=numericValue(el);clearFieldError(el.id);liveUpdate();}
+function showIntro(){hideFoyerScreens();$('introScreen').classList.remove('hidden');}
+function showBackground(){hideFoyerScreens();$('backgroundScreen').classList.remove('hidden');}
+function showReference(){hideFoyerScreens();$('referenceScreen').classList.remove('hidden');}
+function hideFoyerScreens(){['introScreen','backgroundScreen','referenceScreen'].forEach(id=>$(id).classList.add('hidden'));}
+function showIntake(opts={}){pendingTour=!!opts.tour;$('foyer').classList.add('hidden');$('appHeader').classList.add('active');$('app').classList.add('active');state.step=0;mapState.scale=1;mapState.x=0;mapState.y=0;render();requestAnimationFrame(()=>{fitMap();scheduleLines();});showDisclaimer();}
+function startHowToUse(){showIntake({tour:true});}
+function returnToIntro(){skipTour();hideDisclaimer();$('app').classList.remove('active');$('appHeader').classList.remove('active');$('foyer').classList.remove('hidden');showIntro();}
+function showReferenceFromApp(){skipTour();hideDisclaimer();$('app').classList.remove('active');$('appHeader').classList.remove('active');$('foyer').classList.remove('hidden');showReference();}
+function showDisclaimer(){$('disclaimerCheck').checked=false;toggleDisclaimerAccept();$('disclaimerOverlay').classList.remove('hidden');document.body.classList.add('app-blurred');}
+function hideDisclaimer(){$('disclaimerOverlay').classList.add('hidden');document.body.classList.remove('app-blurred');}
+function toggleDisclaimerAccept(){$('disclaimerAccept').disabled=!$('disclaimerCheck').checked;}
+function acceptDisclaimer(){if(!$('disclaimerCheck').checked)return;hideDisclaimer();if(pendingTour)startTour();}
+function declineDisclaimer(){pendingTour=false;returnToIntro();}
+function entityTypeSelect(id,value,onchange='saveFields();liveUpdate();'){return `<label>Entity type</label><select id="${id}" onchange="${onchange}"><option value="c-corp" ${value==='c-corp'?'selected':''}>C corporation</option><option value="s-corp" ${value==='s-corp'?'selected':''}>S corporation</option><option value="partnership" ${value==='partnership'?'selected':''}>Partnership</option><option value="llc" ${value==='llc'?'selected':''}>LLC</option><option value="individual" ${value==='individual'?'selected':''}>Individual</option><option value="trust" ${value==='trust'?'selected':''}>Trust</option><option value="estate" ${value==='estate'?'selected':''}>Estate</option><option value="other" ${value==='other'?'selected':''}>Other entity</option></select>`;}
+function shapeClass(t){return `entity-${t||'other'}`;}
+function entityBadge(t){return t==='s-corp'?'<span class="s-badge">S</span>':'';}
+function taxYearSelect(){const years=[2022,2023,2024,2025,2026];return `<div><label>Tax year beginning</label><select id="taxYearInput" onchange="state.taxYear=Number(this.value);clearFieldError('taxYearInput');saveFields();render();">${years.map(y=>`<option value="${y}" ${Number(state.taxYear)===y?'selected':''}>${y}</option>`).join('')}</select><div class="field-error" id="taxYearInputError"></div></div>`;}
+function yearStatusSelect(prefix,n,e){const st=e[`status${n}`]||'full';return `<select id="${prefix}Status${n}" class="receipt-status" onchange="setYearStatus('${prefix}',${n},this.value)"><option value="full" ${st==='full'?'selected':''}>Full year in operation</option><option value="short" ${st==='short'?'selected':''}>Short taxable year</option><option value="none" ${st==='none'?'selected':''}>Not in existence</option></select><div class="field-error" id="${prefix}Status${n}Error"></div>`;}
+function entityYearInputs(prefix,e){ensureReceiptMeta(e);const years=receiptYears();return `<div class="receipts-header">Operating-period analysis and gross receipts</div><div class="note receipt-rule-note">Analyze each lookback year separately. For a full year, enter that year's gross receipts. For a short taxable year, enter the months in the short year and that year's gross receipts; GRACE annualizes the short-year receipts before averaging. For a pre-existence year, select not in existence and leave receipts blank.</div><div class="entity-years">${[1,2,3].map((n,i)=>{const year=years[i],id=`${prefix}Y${n}`,st=e[`status${n}`]||'full',disabled=st==='none'?'disabled':'';return `<div class="year-card"><div class="year-label">${year}</div>${yearStatusSelect(prefix,n,e)}${st==='short'?`<div class="month-field"><label>Months in short year</label><input id="${prefix}Months${n}" type="number" min="1" max="11" inputmode="numeric" value="${inputValue(e[`months${n}`])}" placeholder="1 to 11" onfocus="selectDefaultZero(this)" oninput="updateYearMonths('${prefix}',${n},this)"><div class="field-error" id="${prefix}Months${n}Error"></div></div>`:`<div class="field-error" id="${prefix}Months${n}Error"></div>`}<input id="${id}" type="number" min="0" inputmode="decimal" value="${st==='none'?'':inputValue(e[`y${n}`])}" placeholder="${st==='none'?'No receipts':`${year} gross receipts`}" ${disabled} onfocus="selectDefaultZero(this)" oninput="updateReceiptField('${prefix}',${n},this)"><div class="field-error" id="${id}Error"></div></div>`;}).join('')}</div><div class="entity-year-analysis" id="${prefix}YearAnalysis">${esc(receiptYearAnalysis(e))}</div>`;}
+function selectDefaultZero(el){if(el&&el.value==='0')setTimeout(()=>el.select(),0);}
+function clearFieldError(id){const el=$(id),err=$(`${id}Error`);if(el){el.classList.remove('invalid');el.removeAttribute('aria-invalid');}if(err){err.textContent='';err.classList.remove('flash-error');}}
+function markFieldError(id,msg){const el=$(id),err=$(`${id}Error`);if(el){el.classList.add('invalid');el.setAttribute('aria-invalid','true');}if(err){err.textContent=msg;err.classList.remove('flash-error');void err.offsetWidth;err.classList.add('flash-error');}}
+function showFormError(msg){const box=$('formError');if(box){box.textContent=msg;box.classList.remove('flash-error');void box.offsetWidth;box.classList.add('flash-error');}}
+function clearFormError(){const box=$('formError');if(box)box.textContent='';}
+function updateReceiptField(prefix,n,el){const val=numericValue(el);const e=entityForPrefix(prefix);if(e)e[`y${n}`]=val;clearFieldError(el.id);liveUpdate();}
+function updateYearAnalysis(prefix,e){const el=$(`${prefix}YearAnalysis`);if(el&&e)el.textContent=receiptYearAnalysis(e);}
+function updateAverages(){const sbtAvgEl=$('sbtAvg');if(sbtAvgEl)sbtAvgEl.textContent=averageLine(state,'Taxpayer-only');updateYearAnalysis('sbt',state);const thresholdEl=$('thresholdNote');if(thresholdEl)thresholdEl.textContent=thresholdNote();if($('upstreamDraftAvg')&&state.upstreamDraft)$('upstreamDraftAvg').textContent=averageLine(state.upstreamDraft,'Average');updateYearAnalysis('upstreamDraft',state.upstreamDraft);if($('downstreamDraftAvg')&&state.downstreamDraft)$('downstreamDraftAvg').textContent=averageLine(state.downstreamDraft,'Average');updateYearAnalysis('downstreamDraft',state.downstreamDraft);if($('candAvg')&&state.currentCandidate)$('candAvg').textContent=averageLine(state.currentCandidate,'Candidate');updateYearAnalysis('cand',state.currentCandidate);}
+function liveUpdate(){saveFields();updateAverages();updateCandidateResult();renderChart();renderScale();renderTrail();}
+function validateReceiptSet(prefix,label){const e=entityForPrefix(prefix);ensureReceiptMeta(e);let ok=true;[1,2,3].forEach((n,i)=>{const year=receiptYears()[i],statusId=`${prefix}Status${n}`,monthId=`${prefix}Months${n}`,receiptId=`${prefix}Y${n}`,statusEl=$(statusId),receiptEl=$(receiptId);const st=statusEl?statusEl.value:e?.[`status${n}`]||'full';const val=receiptEl?numericValue(receiptEl):e?.[`y${n}`];if(!['full','short','none'].includes(st)){markFieldError(statusId,`Select the ${year} operating-period status.`);ok=false;}if(st==='short'){const monthEl=$(monthId);const m=monthEl?numericValue(monthEl):e?.[`months${n}`];if(!Number.isFinite(Number(m))||Number(m)<1||Number(m)>11){markFieldError(monthId,`Enter ${year} months in operation, from 1 to 11.`);ok=false;}}if(st==='full'||st==='short'){if(!hasValue(val)){markFieldError(receiptId,`Enter ${label} gross receipts for ${year}. Enter 0 if there were no receipts.`);ok=false;}else if(Number(val)<0){markFieldError(receiptId,'Gross receipts cannot be negative.');ok=false;}}else if(st==='none'&&hasValue(val)&&Number(val)>0){markFieldError(receiptId,`${year} is marked not in operation; leave receipts blank or change the year status.`);ok=false;}});return ok;}
+function validatePercentInput(id,label,required=true){const el=$(id);if(!el)return true;const val=numericValue(el);if(required&&!hasValue(val)){markFieldError(id,`${label} is required.`);return false;}if(hasValue(val)&&(val<0||val>100)){markFieldError(id,`${label} must be between 0 and 100%.`);return false;}return true;}
+function validateDraft(kind){const prefix=kind==='upstream'?'upstreamDraft':'downstreamDraft';const label=kind==='upstream'?'upstream majority owner':'downstream subsidiary';let ok=true;const nameEl=$(`${prefix}Name`);if(!nameEl||!nameEl.value.trim()){markFieldError(`${prefix}Name`,`${label[0].toUpperCase()+label.slice(1)} name is required.`);ok=false;}ok=validateReceiptSet(prefix,label)&&ok;if(!ok&&!$('formError')?.textContent)showFormError('Complete the red fields before continuing.');return ok;}
+function syncedOwnerRow(existingOwners,i,owner){const prior=(existingOwners||[]).find(x=>x.name===owner.name)||(existingOwners||[])[i]||{};return {name:owner.name||'?',anchor:hasValue(owner.pct)?Number(owner.pct):null,cand:hasValue(prior.cand)?Number(prior.cand):null};}
+function syncCandidateOwnerNames(){if(!state.ownerNames.length)return;const existing=state.currentCandidate?.owners||[];state.currentCandidate.owners=state.ownerNames.map((o,i)=>syncedOwnerRow(existing,i,o));}
+function syncSavedCandidatesToCommonOwners(){if(!state.ownerNames.length)return;state.candidates=state.candidates.map(c=>{const existing=c.owners||[];c.owners=state.ownerNames.map((o,i)=>syncedOwnerRow(existing,i,o));return {...c,...testCandidate(c)};});}
+function updateCandidateFromInputs(){if(!state.currentCandidate)state.currentCandidate=makeCandidate(1);const name=$('candName');if(name)state.currentCandidate.name=name.value||`Potential Brother-Sister ${state.candidates.length+1}`;const typ=$('candType');if(typ)state.currentCandidate.type=typ.value;saveReceiptFields('cand',state.currentCandidate);document.querySelectorAll('[data-owner-row]').forEach((row,i)=>{const inputs=row.querySelectorAll('input');const owner=state.ownerNames[i]||{};state.currentCandidate.owners[i]={name:owner.name||inputs[0]?.value||'?',anchor:hasValue(owner.pct)?Number(owner.pct):numericValue(inputs[1]),cand:numericValue(inputs[2])};});}
+function saveFields(){const n=$('sbtNameInput');if(n)state.sbtName=n.value||'Candidate SBT';const st=$('sbtTypeInput');if(st)state.sbtType=st.value;const ty=$('taxYearInput');if(ty)state.taxYear=Number(ty.value);saveReceiptFields('sbt',state);if(state.upstreamDraft){const n=$('upstreamDraftName'),t=$('upstreamDraftType');if(n)state.upstreamDraft.name=n.value||`Upstream Majority Owner ${state.upstreamChain.length+1}`;if(t)state.upstreamDraft.type=t.value;saveReceiptFields('upstreamDraft',state.upstreamDraft);}if(state.downstreamDraft){const n=$('downstreamDraftName'),t=$('downstreamDraftType');if(n)state.downstreamDraft.name=n.value||`Downstream Subsidiary ${state.downstreamChain.length+1}`;if(t)state.downstreamDraft.type=t.value;saveReceiptFields('downstreamDraft',state.downstreamDraft);}const oc=$('ownerCount');if(oc)state.ownerCount=Number(oc.value||0);const ownerRows=[...document.querySelectorAll('[data-common-owner-row]')];if(ownerRows.length){state.ownerNames=ownerRows.map(row=>{const inputs=row.querySelectorAll('input');return{name:inputs[0].value||'',pct:numericValue(inputs[1])};}).filter(o=>o.name||hasValue(o.pct));state.ownerLabel=state.ownerNames.map(o=>o.name).filter(Boolean).join(' / ')||'Common owners';syncCandidateOwnerNames();}updateCandidateFromInputs();}
+function commonOwnerChanged(){saveFields();syncCandidateOwnerNames();syncSavedCandidatesToCommonOwners();clearFormError();liveUpdate();}
+function candidateInputsChanged(){updateCandidateFromInputs();clearFormError();liveUpdate();}
+function clearCommonOwnerBranch(){state.hasOwners=false;state.ownerCount=0;state.ownerNames=[];state.ownerLabel='Common owners';state.candidates=[];state.currentCandidate=makeCandidate(1);}
+function resetCandidateSeed(){state.currentCandidate=makeCandidate(state.candidates.length+1,state.ownerNames.map(o=>({name:o.name,anchor:o.pct,cand:null})));}
+function formatPct(v,digits=2){return Number(v||0).toLocaleString(undefined,{maximumFractionDigits:digits})+'%';}
+function atLeast(v,threshold){return Number(v)+1e-9>=Number(threshold);}
+function greaterThan(v,threshold){return Number(v)>Number(threshold);}
+function testCandidate(c){
+  const ownerRows=(c.owners||[]).map(o=>{
+    const anchor=Number(o.anchor||0),bs=Number(o.cand||0),lower=Math.min(anchor,bs);
+    return {name:o.name||'?',anchor,bs,lower};
+  });
+  const anchorTotal=ownerRows.reduce((s,o)=>s+o.anchor,0),bsTotal=ownerRows.reduce((s,o)=>s+o.bs,0),overlap=ownerRows.reduce((s,o)=>s+o.lower,0);
+  const anchorPass=atLeast(anchorTotal,80),bsPass=atLeast(bsTotal,80),identicalPass=greaterThan(overlap,50);
+  return {anchorTotal,bsTotal,candTotal:bsTotal,overlap,anchorPass,bsPass,identicalPass,included:anchorPass&&bsPass&&identicalPass,ownerRows};
+}
+function ownershipRowsHtml(rows){if(!rows||!rows.length)return '';return `<table class="ownership-table"><thead><tr><th>Owner</th><th>Anchor %</th><th>Brother-sister %</th><th>Lower-of %</th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.name)}</td><td>${formatPct(o.anchor,4)}</td><td>${formatPct(o.bs,4)}</td><td>${formatPct(o.lower,4)}</td></tr>`).join('')}</tbody></table>`;}
+function resultHtml(r){
+  const anchorRaw=commonOwnerAnchorName(),anchor=esc(anchorRaw),bsTotal=hasValue(r.bsTotal)?Number(r.bsTotal):Number(r.candTotal||0);
+  const anchorPass=hasValue(r.anchorPass)?!!r.anchorPass:atLeast(r.anchorTotal,80),bsPass=hasValue(r.bsPass)?!!r.bsPass:atLeast(bsTotal,80),identicalPass=hasValue(r.identicalPass)?!!r.identicalPass:greaterThan(r.overlap,50);
+  const included=anchorPass&&bsPass&&identicalPass;
+  const reasons=[];
+  if(!anchorPass)reasons.push(`${anchorRaw} common-owner-group ownership is ${formatPct(r.anchorTotal,4)}, below 80%`);
+  if(!bsPass)reasons.push(`common-owner-group ownership of the brother-sister entity is ${formatPct(bsTotal,4)}, below 80%`);
+  if(!identicalPass)reasons.push(`identical ownership, measured by lower-of percentages, is ${formatPct(r.overlap,4)}, not more than 50%`);
+  const result=included?'<span class="pass">include receipts</span>':`<span class="fail">do not include receipts</span> because ${esc(reasons.join('; '))}.`;
+  return `<div class="ownership-tests"><div class="test-line"><strong>Test 1 — 80% controlling interest:</strong> <span class="${anchorPass&&bsPass?'pass':'fail'}">${anchorPass&&bsPass?'passes':'fails'}</span><br><span class="node-amount">${anchor}: ${formatPct(r.anchorTotal,4)} ${anchorPass?'meets':'does not meet'} 80% · Brother-sister entity: ${formatPct(bsTotal,4)} ${bsPass?'meets':'does not meet'} 80%</span></div><div class="test-line"><strong>Test 2 — more-than-50% identical ownership:</strong> <span class="${identicalPass?'pass':'fail'}">${identicalPass?'passes':'fails'} (${formatPct(r.overlap,4)})</span></div>${ownershipRowsHtml(r.ownerRows)}<div class="result-banner"><strong>Result:</strong> ${result}</div></div>`;
+}
+function updateCandidateResult(){const box=document.querySelector('.candidate-result');if(box)box.innerHTML=resultHtml(testCandidate(state.currentCandidate));}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function startUpstreamMajority(){saveFields();state.upstreamDraft=makeEntity(`Upstream Majority Owner ${state.upstreamChain.length+1}`,'c-corp');state.upstreamClosed=false;state.upstreamTermination=null;clearCommonOwnerBranch();render();}
+function saveUpstreamMajority(){saveFields();if(!validateDraft('upstream'))return;state.upstreamChain.push(clone(state.upstreamDraft));state.upstreamDraft=null;state.upstreamClosed=false;state.upstreamTermination=null;render();}
+function cancelUpstreamDraft(){state.upstreamDraft=null;render();}
+function setCommonOwnerAbove(){saveFields();state.upstreamDraft=null;state.upstreamClosed=true;state.upstreamTermination='common_owner';state.hasOwners=true;state.ownerCount=state.ownerCount||state.ownerNames.length||0;resetCandidateSeed();render();}
+function setNoUpstreamAbove(){saveFields();state.upstreamDraft=null;state.upstreamClosed=true;state.upstreamTermination='none';clearCommonOwnerBranch();render();}
+function reopenUpstream(){saveFields();state.upstreamClosed=false;state.upstreamTermination=null;clearCommonOwnerBranch();render();}
+function removeLastUpstream(){saveFields();state.upstreamChain.pop();state.upstreamClosed=false;state.upstreamTermination=null;clearCommonOwnerBranch();render();}
+function startDownstreamEntity(){saveFields();state.downstreamDraft=makeEntity(`Downstream Subsidiary ${state.downstreamChain.length+1}`,'llc');state.downstreamClosed=false;render();}
+function saveDownstreamEntity(){saveFields();if(!validateDraft('downstream'))return;state.downstreamChain.push(clone(state.downstreamDraft));state.downstreamDraft=null;state.downstreamClosed=false;render();}
+function cancelDownstreamDraft(){state.downstreamDraft=null;render();}
+function closeDownstreamChain(){saveFields();state.downstreamDraft=null;state.downstreamClosed=true;render();}
+function reopenDownstream(){saveFields();state.downstreamClosed=false;render();}
+function removeLastDownstream(){saveFields();state.downstreamChain.pop();state.downstreamClosed=false;render();}
+function isCurrentCandidateBlank(){const c=state.currentCandidate;if(!c)return true;const anyReceipt=[1,2,3].some(n=>hasValue(c[`y${n}`]));return !anyReceipt&&c.owners.every(o=>!hasValue(o.cand));}
+function addCandidate(stay=true){saveFields();if(!validateStep(4))return;const r=testCandidate(state.currentCandidate);state.candidates.push(JSON.parse(JSON.stringify({...state.currentCandidate,...r})));state.currentCandidate=makeCandidate(state.candidates.length+1,state.currentCandidate.owners.map(o=>({name:o.name,anchor:o.anchor,cand:null})));if(!stay)state.step=5;render();}
+function finishCandidates(){saveFields();if(isCurrentCandidateBlank()){state.step=5;render();return;}addCandidate(false);}
+function resetCandidates(){state.candidates=[];state.currentCandidate=makeCandidate(1,state.ownerNames.map(o=>({name:o.name,anchor:o.pct,cand:null})));render();}
+function progressHtml(){return steps.map((_,i)=>`<span class="dot ${i===state.step?'active':i<state.step?'done':''}"></span>`).join('');}
+function navHtml(){return `<div id="formError" class="form-error"></div><div class="nav-row"><button class="secondary" onclick="back()">Back</button><div><button class="link" onclick="showReferenceFromApp()">Gross receipts table</button><button onclick="next()">${state.step===steps.length-1?'Refresh':'Next'}</button></div></div>`;}
+function upstreamSummaryHtml(){if(!state.upstreamChain.length)return `<div class="note">No upstream majority-owner chain has been added.</div>`;const topDown=[...state.upstreamChain].reverse();return `<div class="callout"><strong>Upstream majority-owner chain</strong><br>${topDown.map((e,i)=>`${i+1}. ${esc(e.name)} — ${money(entityAvg(e))} avg. (${receiptPeriodSummary(e)})`).join('<br>')}<br>${topDown.length+1}. ${esc(state.sbtName||'Candidate SBT')} — SBT</div>`;}
+function downstreamSummaryHtml(){if(!state.downstreamChain.length)return `<div class="note">No downstream subsidiary chain has been added.</div>`;return `<div class="callout"><strong>Downstream chain</strong><br>${esc(state.sbtName||'Candidate SBT')} — SBT<br>${state.downstreamChain.map((e,i)=>`${i+1}. ${esc(e.name)} — ${money(entityAvg(e))} avg. (${receiptPeriodSummary(e)})`).join('<br>')}</div>`;}
+function draftFields(kind,d){const prefix=kind==='upstream'?'upstreamDraft':'downstreamDraft';const label=kind==='upstream'?'Majority owner':'Downstream subsidiary';return `<label>${label} name</label><input id="${prefix}Name" placeholder="${label} name" value="${esc(d.name||'')}" oninput="saveFields();liveUpdate();"><div class="field-error" id="${prefix}NameError"></div>${entityTypeSelect(`${prefix}Type`,d.type,'saveFields();liveUpdate();')}${entityYearInputs(prefix,d)}<div class="entity-average" id="${prefix}Avg">${averageLine(d,'Average')}</div>`;}
+function renderPrompt(){const p=$('prompt'),s=state.step;if(s===0){p.innerHTML=`<p class="kicker">Step 1 · SBT receipts</p><h2>Enter the candidate SBT’s gross receipts</h2>${taxYearSelect()}<label>Small business taxpayer name</label><input id="sbtNameInput" placeholder="Small business taxpayer name (taxpayer seeking SBT status)" value="${esc(state.sbtName==='Candidate SBT'?'':state.sbtName)}" oninput="state.sbtName=this.value||'Candidate SBT';liveUpdate();"><div class="field-error" id="sbtNameInputError"></div>${entityTypeSelect('sbtTypeInput',state.sbtType)}${entityYearInputs('sbt',state)}<p class="threshold-note" id="thresholdNote">${esc(thresholdNote())}</p><div class="entity-average" id="sbtAvg">${averageLine(state,'Taxpayer-only')}</div>${navHtml()}`;return;}
+if(s===1){const top=currentUpstreamTopEntity();let body=`<p class="kicker">Step 2 · Upstream chain</p><h2>Who is directly above ${esc(top.name||'the current top entity')}?</h2><p>Complete the ownership chain above the SBT before adding subsidiaries or brother-sister candidates.</p><div class="note">At each level, identify what is directly above the current entity.</div>${upstreamSummaryHtml()}`;if(state.upstreamClosed){body+=`<div class="note">Upstream chain resolved: ${state.upstreamTermination==='common_owner'?`a common owner group is directly above ${esc(commonOwnerAnchorName())}`:`no one is directly above ${esc(top.name||'the current top entity')}`}.</div><div class="choice-row"><button class="secondary" type="button" onclick="reopenUpstream()">Reopen upstream chain</button>${state.upstreamChain.length?'<button class="ghost" type="button" onclick="removeLastUpstream()">Remove top majority owner</button>':''}</div>`;}else if(state.upstreamDraft){body+=`<div class="note">You are adding a majority owner directly above ${esc(top.name||'the current top entity')}. After you save it, GRACE asks what is above that owner.</div>${draftFields('upstream',state.upstreamDraft)}<div class="choice-row"><button class="gold" type="button" onclick="saveUpstreamMajority()">Save and continue upward</button><button class="secondary" type="button" onclick="cancelUpstreamDraft()">Cancel</button></div>`;}else{body+=`<div class="choice-row one"><button class="secondary" type="button" onclick="startUpstreamMajority()">Majority owner directly above ${esc(top.name||'current top entity')}</button><button class="secondary" type="button" onclick="setCommonOwnerAbove()">Common owner group directly above ${esc(top.name||'current top entity')}</button><button class="secondary" type="button" onclick="setNoUpstreamAbove()">No one directly above ${esc(top.name||'current top entity')}</button></div>`;}p.innerHTML=body+navHtml();return;}
+if(s===2){if(state.hasOwners!==true){p.innerHTML=`<p class="kicker">Step 3 · Common owners</p><h2>No common owner group was selected.</h2><p>This step applies only when the upstream chain ends with a common owner group.</p>${navHtml()}`;return;}const count=Math.max(0,Number(state.ownerCount||0));const ownerRows=count?`<label>Common owners above ${esc(commonOwnerAnchorName())}</label><div class="owner-grid"><div class="head">Owner</div><div class="head">Anchor %</div>${Array.from({length:count},(_,i)=>{const existing=state.ownerNames[i]||{};const ownerId=`ownerName${i}`,pctId=`ownerPct${i}`;return `<div data-common-owner-row="${i}" style="display:contents"><div><input id="${ownerId}" placeholder="Owner ${i+1} name" value="${esc(existing.name||'')}" oninput="commonOwnerChanged()"><div class="field-error" id="${ownerId}Error"></div></div><div><input id="${pctId}" type="number" min="0" max="100" placeholder="${esc(commonOwnerAnchorName())} %" value="${inputValue(existing.pct)}" onfocus="selectDefaultZero(this)" oninput="commonOwnerChanged()"><div class="field-error" id="${pctId}Error"></div></div></div>`;}).join('')}</div>`:'';p.innerHTML=`<p class="kicker">Step 3 · Common owner group</p><h2>Enter common owners above ${esc(commonOwnerAnchorName())}.</h2><p>List the five-or-fewer individuals, estates, or trusts used for brother-sister testing. If the group is directly above the SBT, the SBT is the anchor. If the group is above a majority owner, that owner is the anchor; the SBT remains included through the vertical chain.</p><label>Number of individuals, estates, or trusts in the common owner group</label><input id="ownerCount" type="number" min="0" max="5" placeholder="Number of owners" value="${inputValue(state.ownerCount)}" onfocus="selectDefaultZero(this)" oninput="state.ownerCount=Number(this.value||0);render()"><div class="field-error" id="ownerCountError"></div>${ownerRows}<div class="note">Candidate entities are tested against the anchor entity directly below the common owner group.</div>${navHtml()}`;return;}
+if(s===3){const bottom=downstreamBottomEntity();let body=`<p class="kicker">Step 4 · Downstream chain</p><h2>Does ${esc(bottom.name||'the current bottom entity')} own more than 50% of another downstream entity?</h2><p>Add downstream subsidiaries only after the upstream chain is resolved.</p>${downstreamSummaryHtml()}`;if(state.downstreamClosed){body+=`<div class="note">Downstream chain resolved.</div><div class="choice-row"><button class="secondary" type="button" onclick="reopenDownstream()">Reopen downstream chain</button>${state.downstreamChain.length?'<button class="ghost" type="button" onclick="removeLastDownstream()">Remove last downstream entity</button>':''}</div>`;}else if(state.downstreamDraft){body+=`<div class="note">You are adding a downstream entity directly below ${esc(bottom.name||'the current bottom entity')}.</div>${draftFields('downstream',state.downstreamDraft)}<div class="choice-row"><button class="gold" type="button" onclick="saveDownstreamEntity()">Save and continue downward</button><button class="secondary" type="button" onclick="cancelDownstreamDraft()">Cancel</button></div>`;}else{body+=`<div class="choice-row"><button class="secondary" type="button" onclick="startDownstreamEntity()">Downstream entity directly below ${esc(bottom.name||'current bottom entity')}</button><button class="secondary" type="button" onclick="closeDownstreamChain()">No downstream entity directly below ${esc(bottom.name||'current bottom entity')}</button></div>`;}p.innerHTML=body+navHtml();return;}
+if(s===4){if(state.hasOwners!==true){p.innerHTML=`<p class="kicker">Step 5 · Brother-sister test</p><h2>No common owner group was selected.</h2><p>Brother-sister testing is skipped.</p>${navHtml()}`;return;}syncCandidateOwnerNames();const c=state.currentCandidate,r=testCandidate(c);p.innerHTML=`<p class="kicker">Step 5 · Brother-sister test</p><h2>Test a potential brother-sister entity against ${esc(commonOwnerAnchorName())}.</h2><p>Use the same common owners. Test 1 requires those owners to own at least 80% of both the anchor and the potential brother-sister entity. Test 2 requires more than 50% identical ownership, measured by the lower of each owner’s anchor percentage and brother-sister percentage. Anchor percentages are locked from the common-owner step.</p><label>Potential brother-sister entity name</label><input id="candName" placeholder="Entity name" value="${esc(c.name)}" oninput="candidateInputsChanged()"><div class="field-error" id="candNameError"></div>${entityTypeSelect('candType',c.type,'candidateInputsChanged()')}${entityYearInputs('cand',c)}<div class="entity-average" id="candAvg">${averageLine(c,'Candidate')}</div><div class="locked-note">Owner names and anchor percentages come from Step 3. To change them, return to the common-owner step.</div><div class="candidate-owner-grid"><div class="head">Owner</div><div class="head">Anchor %</div><div class="head">Brother-sister %</div>${c.owners.map((o,i)=>{const nameId=`candOwnerName${i}`,anchorId=`candOwnerAnchor${i}`,candId=`candOwnerPct${i}`;return `<div data-owner-row="${i}" style="display:contents"><div><input id="${nameId}" class="locked-field" value="${esc(o.name)}" readonly tabindex="-1"><div class="field-error" id="${nameId}Error"></div></div><div><input id="${anchorId}" class="locked-field" type="number" min="0" max="100" value="${inputValue(o.anchor)}" readonly tabindex="-1"><div class="field-error" id="${anchorId}Error"></div></div><div><input id="${candId}" type="number" min="0" max="100" value="${inputValue(o.cand)}" onfocus="selectDefaultZero(this)" oninput="candidateInputsChanged()"><div class="field-error" id="${candId}Error"></div></div></div>`;}).join('')}</div><div class="callout candidate-result">${resultHtml(r)}</div><div id="formError" class="form-error"></div><div class="nav-row"><button class="secondary" onclick="back()">Back</button><div><button class="link" onclick="showReferenceFromApp()">Gross receipts table</button><button class="gold" onclick="addCandidate(true)">Add candidate</button><button onclick="finishCandidates()">Finish</button></div></div>`;return;}
+if(s===5){p.innerHTML=`<p class="kicker">Step 6 · Review</p><h2>Review the aggregation map and receipts scale.</h2><p>The scale includes the SBT, each majority-owned upstream or downstream chain entity, and any included brother-sister candidate.</p><div class="note">The upstream chain is resolved before downstream and brother-sister questions. If present, the common-owner branch is anchored to the entity directly below the common owner group. Average receipts use the year-by-year lookback analysis; short taxable years are annualized before the average is computed.</div><div class="nav-row"><button class="secondary" onclick="back()">Back</button><div><button class="link" onclick="showReferenceFromApp()">Gross receipts table</button>${state.hasOwners?'<button class="gold" onclick="state.step=4;render()">Add candidate</button>':''}<button class="ghost" onclick="resetCandidates()">Clear candidates</button></div></div>`;}}
+function validateStep(step=state.step,opts={}){clearFormError();let ok=true;if(step===0){ok=validateReceiptSet('sbt','SBT')&&ok;}if(step===1){if(state.upstreamDraft){showFormError('Save or cancel the pending upstream majority owner before continuing.');ok=false;}if(!state.upstreamClosed){showFormError('Resolve what is directly above the current top entity before continuing.');ok=false;}}if(step===2&&state.hasOwners===true){const oc=$('ownerCount');if(!oc||Number(oc.value||0)<=0){markFieldError('ownerCount','Enter the number of common owners.');ok=false;}if(Number(oc?.value||0)>5){markFieldError('ownerCount','GRACE currently supports five or fewer common owners.');ok=false;}document.querySelectorAll('[data-common-owner-row]').forEach((row,i)=>{const inputs=row.querySelectorAll('input');if(!inputs[0].value.trim()){markFieldError(inputs[0].id,`Owner ${i+1} name is required.`);ok=false;}if(!validatePercentInput(inputs[1].id,`Owner ${i+1} anchor percentage`))ok=false;});}if(step===3){if(state.downstreamDraft){showFormError('Save or cancel the pending downstream entity before continuing.');ok=false;}if(!state.downstreamClosed){showFormError('Resolve the downstream chain before continuing: add an entity or confirm no further downstream entities.');ok=false;}}if(step===4){if(opts.allowBlankCurrentIfSaved&&state.candidates.length&&isCurrentCandidateBlank())return true;ok=validateReceiptSet('cand','candidate')&&ok;if(!$('candName')?.value.trim()){markFieldError('candName','Candidate name is required.');ok=false;}document.querySelectorAll('[data-owner-row]').forEach((row,i)=>{const inputs=row.querySelectorAll('input');if(!inputs[0].value.trim()){markFieldError(inputs[0].id,`Owner ${i+1} name is required.`);ok=false;}if(!validatePercentInput(inputs[1].id,`Owner ${i+1} anchor percentage`))ok=false;if(!validatePercentInput(inputs[2].id,`Owner ${i+1} brother-sister percentage`))ok=false;});}if(!ok&&!$('formError')?.textContent)showFormError('Complete the red fields before continuing.');return ok;}
+function next(){saveFields();if(state.step===4){finishCandidates();return;}if(!validateStep())return;if(state.step===1)state.step=state.hasOwners?2:3;else if(state.step===2)state.step=3;else if(state.step===3)state.step=state.hasOwners?4:5;else if(state.step<steps.length-1)state.step++;render();}
+function back(){saveFields();if(state.step===0){returnToIntro();return;}if(state.step===5)state.step=state.hasOwners?4:3;else if(state.step===4)state.step=3;else if(state.step===3)state.step=state.hasOwners?2:1;else if(state.step===2)state.step=1;else if(state.step>0)state.step--;render();}
+function includedItems(){const items=[{name:state.sbtName||'Candidate SBT',receipts:sbtAverage(),period:receiptPeriodSummary(state)}];state.upstreamChain.forEach(e=>items.push({name:e.name,receipts:entityAvg(e),period:receiptPeriodSummary(e)}));state.downstreamChain.forEach(e=>items.push({name:e.name,receipts:entityAvg(e),period:receiptPeriodSummary(e)}));state.candidates.filter(c=>c.included).forEach(c=>items.push({name:c.name,receipts:candidateAverage(c),period:receiptPeriodSummary(c)}));return items;}
+function renderScale(){const items=includedItems(),total=items.reduce((s,i)=>s+Number(i.receipts||0),0),threshold=currentThreshold(),pct=threshold?Math.min(100,(total/threshold)*100):0;$('fill').style.width=pct+'%';$('scaleStatus').textContent=`${money(total)} / ${money(threshold)}`;$('scaleStatus').className=total>threshold?'fail':'pass';$('receiptList').innerHTML=items.map(i=>`<div class="receipt-line"><span>${esc(i.name)}<br><small>${esc(i.period)}</small></span><strong>${money(i.receipts)}</strong></div>`).join('');}
+function mapLayout(){const baseTop=70,rowGap=230,candidateStep=220,mainLeft=270,sideLeft=690;const up=state.upstreamChain.length,down=state.downstreamChain.length,ownerRows=state.hasOwners?1:0;const sbtTop=baseTop+(ownerRows+up)*rowGap;const ownersTop=state.hasOwners?baseTop:baseTop;const candidateTop=state.hasOwners?baseTop+rowGap:baseTop;const verticalBottom=sbtTop+(down*rowGap)+220;const candidateBottom=state.hasOwners?candidateTop+(Math.max(1,state.candidates.length)*candidateStep)+180:0;return{baseTop,rowGap,candidateStep,mainLeft,sideLeft,sbtTop,ownersTop,candidateTop,ownerRows,h:Math.max(760,verticalBottom+80,candidateBottom+80)};}
+function updateMapCanvas(){const l=mapLayout();$('mapStage').style.height=l.h+'px';$('lines').style.height=l.h+'px';$('lines').setAttribute('viewBox',`0 0 1180 ${l.h}`);}
+function nodeHtml(e){return `${entityBadge(e.type)}<span class="node-name">${esc(e.name)}</span><span class="node-amount">${money(entityAvg(e))} avg.<br>${esc(receiptPeriodSummary(e))}</span>`;}
+function renderChart(){updateMapCanvas();const l=mapLayout();const sbt=$('sbtNode');sbt.style.display='flex';sbt.className=`node sbt ${shapeClass(state.sbtType)}`;sbt.style.left=l.mainLeft+'px';sbt.style.top=l.sbtTop+'px';sbt.innerHTML=`${entityBadge(state.sbtType)}<span class="node-name">${esc(state.sbtName||'Candidate SBT')}</span><span class="node-amount">${money(sbtAverage())} avg.<br>${esc(receiptPeriodSummary(state))}</span>`;const upWrap=$('upstreamNodes');upWrap.innerHTML='';state.upstreamChain.forEach((e,i)=>{ensureReceiptMeta(e);const displayOrder=state.upstreamChain.length-1-i;const node=document.createElement('div');node.id=`upNode${i}`;node.className=`node parent ${shapeClass(e.type)}`;node.style.display='flex';node.style.left=l.mainLeft+'px';node.style.top=(l.baseTop+(l.ownerRows+displayOrder)*l.rowGap)+'px';node.innerHTML=nodeHtml(e);upWrap.appendChild(node);});const downWrap=$('downstreamNodes');downWrap.innerHTML='';state.downstreamChain.forEach((e,i)=>{ensureReceiptMeta(e);const node=document.createElement('div');node.id=`downNode${i}`;node.className=`node sub ${shapeClass(e.type)}`;node.style.display='flex';node.style.left=l.mainLeft+'px';node.style.top=(l.sbtTop+(i+1)*l.rowGap)+'px';node.innerHTML=nodeHtml(e);downWrap.appendChild(node);});if(state.hasOwners){const owners=$('ownersNode');owners.style.display='flex';owners.className='node owners entity-other';owners.style.left=l.mainLeft+'px';owners.style.top=l.ownersTop+'px';owners.innerHTML=`<span class="node-name">Common Owner Group</span><span class="node-amount">${esc(ownerLabel())}<br>above ${esc(commonOwnerAnchorName())}</span>`;}else $('ownersNode').style.display='none';const wrap=$('candidateNodes');wrap.innerHTML='';state.candidates.forEach((c,i)=>{ensureReceiptMeta(c);const node=document.createElement('div');node.id=`bsNode${i}`;node.className=`node bs ${shapeClass(c.type)} ${c.included?'included':'excluded'}`;node.style.display='flex';node.style.left=l.sideLeft+'px';node.style.top=(l.candidateTop+i*l.candidateStep)+'px';node.innerHTML=`${entityBadge(c.type)}<span class="node-name">${esc(c.name)}</span><span class="node-amount">${money(candidateAverage(c))} avg.<br>${esc(receiptPeriodSummary(c))}<br>anchor 80% ${(hasValue(c.anchorPass)?c.anchorPass:atLeast(c.anchorTotal,80))?'pass':'fail'} · brother-sister 80% ${(hasValue(c.bsPass)?c.bsPass:atLeast((hasValue(c.bsTotal)?c.bsTotal:c.candTotal),80))?'pass':'fail'} · identical ${(hasValue(c.identicalPass)?c.identicalPass:greaterThan(c.overlap,50))?'pass':'fail'} ${formatPct(c.overlap,4)}</span>`;wrap.appendChild(node);});scheduleLines();}
+function scheduleLines(){if(lineFrame)cancelAnimationFrame(lineFrame);lineFrame=requestAnimationFrame(()=>{lineFrame=null;renderLines();});}
+function upstreamNodeIds(){return state.upstreamChain.map((_,i)=>`upNode${i}`);}
+function downstreamNodeIds(){return state.downstreamChain.map((_,i)=>`downNode${i}`);}
+function candidateNodeIds(){return [...document.querySelectorAll('#candidateNodes .bs')].map(n=>n.id);}
+function visibleMapNodeIds(){return [...upstreamNodeIds(),'sbtNode',...downstreamNodeIds(),'ownersNode',...candidateNodeIds()].filter(id=>$(id)&&$(id).style.display!=='none');}
+function renderLines(){const svg=$('lines');if(!svg||!$('app').classList.contains('active'))return;const isVisible=id=>$(id)&&$(id).style.display!=='none';const box=id=>{const el=$(id);return{left:el.offsetLeft,right:el.offsetLeft+el.offsetWidth,top:el.offsetTop,bottom:el.offsetTop+el.offsetHeight,cx:el.offsetLeft+el.offsetWidth/2,cy:el.offsetTop+el.offsetHeight/2};};const defs=`<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#111"></path></marker></defs>`;const straight=(x1,y1,x2,y2)=>`<line x1="${Math.round(x1)}" y1="${Math.round(y1)}" x2="${Math.round(x2)}" y2="${Math.round(y2)}" stroke="#111" stroke-width="2" marker-end="url(#arrow)" />`;const elbow=(pts,arrow=true)=>`<path d="${pts.map((p,i)=>`${i?'L':'M'}${Math.round(p[0])} ${Math.round(p[1])}`).join(' ')}" fill="none" stroke="#111" stroke-width="2" ${arrow?'marker-end="url(#arrow)"':''} />`;const lines=[defs];if(!isVisible('sbtNode')){svg.innerHTML=defs;return;}const vertical=(state.hasOwners&&isVisible('ownersNode')?['ownersNode']:[]).concat([...upstreamNodeIds()].reverse(),'sbtNode',...downstreamNodeIds());for(let i=0;i<vertical.length-1;i++){if(isVisible(vertical[i])&&isVisible(vertical[i+1])){const a=box(vertical[i]),b=box(vertical[i+1]);lines.push(straight(a.cx,a.bottom,b.cx,b.top));}}if(state.hasOwners&&isVisible('ownersNode')){const o=box('ownersNode');candidateNodeIds().filter(isVisible).map(id=>box(id)).forEach(b=>{lines.push(straight(o.cx,o.bottom,b.cx,b.top));});}svg.innerHTML=lines.join('');}
+function renderTrail(){const lines=[`<li>Taxpayer-only average: ${money(sbtAverage())}; ${esc(receiptYearAnalysis(state))}.</li>`,`<li>Tax year beginning ${state.taxYear}; threshold used: ${money(currentThreshold())}.</li>`];if(state.upstreamChain.length)lines.push(`<li>Upstream majority-owner chain: ${[...state.upstreamChain].reverse().map(e=>`${esc(e.name)} (${money(entityAvg(e))}; ${esc(receiptYearAnalysis(e))})`).join(' → ')} → ${esc(state.sbtName||'SBT')}.</li>`);if(state.upstreamTermination==='common_owner')lines.push(`<li>Common owner group directly above ${esc(commonOwnerAnchorName())}; brother-sister candidates are tested against that anchor.</li>`);if(state.upstreamTermination==='none')lines.push(`<li>No further upstream owner above ${esc(currentUpstreamTopEntity().name||'the current top entity')}.</li>`);if(state.downstreamChain.length)lines.push(`<li>Downstream majority-owned chain: ${esc(state.sbtName||'SBT')} → ${state.downstreamChain.map(e=>`${esc(e.name)} (${money(entityAvg(e))}; ${esc(receiptYearAnalysis(e))})`).join(' → ')}.</li>`);if(state.downstreamClosed&&!state.downstreamChain.length)lines.push('<li>No downstream subsidiary branch.</li>');if(state.hasOwners===true)lines.push(`<li>Brother-sister branch through ${esc(ownerLabel())}; anchor entity: ${esc(commonOwnerAnchorName())}.</li>`);if(state.hasOwners===false)lines.push('<li>No common owner group; brother-sister branch skipped.</li>');state.candidates.forEach(c=>{const bsTotal=hasValue(c.bsTotal)?c.bsTotal:c.candTotal;lines.push(`<li>${esc(c.name)}: ${c.included?'included':'not included'}; average ${money(candidateAverage(c))}; ${esc(receiptYearAnalysis(c))}; controlling interest ${(hasValue(c.anchorPass)?c.anchorPass:atLeast(c.anchorTotal,80))&&(hasValue(c.bsPass)?c.bsPass:atLeast(bsTotal,80))?'passes':'fails'} (${esc(commonOwnerAnchorName())} ${formatPct(c.anchorTotal,4)}, brother-sister ${formatPct(bsTotal,4)}); identical ownership ${(hasValue(c.identicalPass)?c.identicalPass:greaterThan(c.overlap,50))?'passes':'fails'} at ${formatPct(c.overlap,4)}.</li>`);});$('trail').innerHTML=lines.join('');}
+function render(){saveFields();$('progress').innerHTML=progressHtml();renderPrompt();renderChart();renderScale();renderTrail();scheduleLines();applyMapTransform();}
+function applyMapTransform(){const stage=$('mapStage');if(stage)stage.style.transform=`translate(${mapState.x}px,${mapState.y}px) scale(${mapState.scale})`;}
+function fitMap(){const map=$('map');if(!map)return;const ids=visibleMapNodeIds();if(!ids.length){mapState.scale=.75;mapState.x=80;mapState.y=50;applyMapTransform();return;}let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;ids.forEach(id=>{const el=$(id);minX=Math.min(minX,el.offsetLeft);minY=Math.min(minY,el.offsetTop);maxX=Math.max(maxX,el.offsetLeft+el.offsetWidth);maxY=Math.max(maxY,el.offsetTop+el.offsetHeight);});minX-=80;minY-=80;maxX+=120;maxY+=80;const contentW=maxX-minX,contentH=maxY-minY,scale=Math.min(map.clientWidth/contentW,map.clientHeight/contentH,.95);mapState.scale=Math.max(.32,Math.min(1.15,scale));mapState.x=(map.clientWidth-contentW*mapState.scale)/2-(minX*mapState.scale);mapState.y=(map.clientHeight-contentH*mapState.scale)/2-(minY*mapState.scale);applyMapTransform();}
+function zoomMap(mult){const map=$('map');if(!map)return;const old=mapState.scale,next=Math.max(.32,Math.min(1.6,old*mult)),cx=map.clientWidth/2,cy=map.clientHeight/2;mapState.x=cx-(cx-mapState.x)*(next/old);mapState.y=cy-(cy-mapState.y)*(next/old);mapState.scale=next;applyMapTransform();}
+function initMapPan(){const map=$('map');if(!map)return;map.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;map.setPointerCapture(e.pointerId);mapState.dragging=true;mapState.startX=e.clientX;mapState.startY=e.clientY;mapState.baseX=mapState.x;mapState.baseY=mapState.y;});map.addEventListener('pointermove',e=>{if(!mapState.dragging)return;mapState.x=mapState.baseX+(e.clientX-mapState.startX);mapState.y=mapState.baseY+(e.clientY-mapState.startY);applyMapTransform();});map.addEventListener('pointerup',()=>mapState.dragging=false);map.addEventListener('pointercancel',()=>mapState.dragging=false);map.addEventListener('wheel',e=>{e.preventDefault();zoomMap(e.deltaY>0?.92:1.08);},{passive:false});}
+function copyEmail(el){const email=typeof el==='string'?el:el?.dataset?.email;if(!email)return;const notice=$('copyNotice');const show=()=>{if(notice){notice.textContent=`Copied ${email} to clipboard.`;setTimeout(()=>{if(notice.textContent.includes(email))notice.textContent='';},2200);}};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(email).then(show).catch(()=>fallbackCopyEmail(email,show));}else fallbackCopyEmail(email,show);}
+function fallbackCopyEmail(email,after){const area=document.createElement('textarea');area.value=email;area.setAttribute('readonly','');area.style.position='fixed';area.style.left='-9999px';document.body.appendChild(area);area.select();try{document.execCommand('copy');}catch(e){}area.remove();after();}
+function stateExportObject(){saveFields();return {version:14,savedAt:new Date().toISOString(),workflow:'upstream-first-chain-year-by-year-receipts-brother-sister-locked-anchor-two-tests-diagnostic-table-pdf-export',receiptRule:'Each lookback year is analyzed separately. Full years use actual gross receipts, short taxable years are annualized for that year, and years before existence are excluded from the average.',state:JSON.parse(JSON.stringify(state)),summary:{threshold:currentThreshold(),includedItems:includedItems(),anchor:state.hasOwners?commonOwnerAnchorName():null}};}
+const ENTITY_TYPE_LABELS={'c-corp':'C corporation','s-corp':'S corporation','partnership':'Partnership','llc':'LLC','individual':'Individual','trust':'Trust','estate':'Estate','other':'Other entity'};
+function entityTypeLabel(t){return ENTITY_TYPE_LABELS[t]||'Entity';}
+function pdfCleanText(v){return String(v??'').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014\u2212]/g,'-').replace(/\u2192/g,'->').replace(/\u00b7/g,'-').replace(/\u00a9/g,'(c)').replace(/\u00a0/g,' ').replace(/[^\x20-\x7E]/g,' ').replace(/\s+/g,' ').trim();}
+function pdfHex(v){const s=pdfCleanText(v);let out='';for(let i=0;i<s.length;i++)out+=s.charCodeAt(i).toString(16).padStart(2,'0').toUpperCase();return `<${out}>`;}
+function addPdfLine(lines,text='',opts={}){const size=opts.size||10,indent=opts.indent||0,bold=!!opts.bold;if(text===null||text===undefined||String(text).trim()===''){lines.push({text:'',size,indent,bold});return;}const clean=pdfCleanText(text);const maxChars=Math.max(22,Math.floor((612-108-(indent*18))/(size*.55)));let current='';clean.split(' ').forEach(word=>{if(!word)return;if(word.length>maxChars){if(current){lines.push({text:current,size,indent,bold});current='';}for(let i=0;i<word.length;i+=maxChars)lines.push({text:word.slice(i,i+maxChars),size,indent,bold});return;}const trial=current?`${current} ${word}`:word;if(trial.length>maxChars){lines.push({text:current,size,indent,bold});current=word;}else current=trial;});if(current)lines.push({text:current,size,indent,bold});}
+function addPdfHeading(lines,text){addPdfLine(lines,'',{size:6});addPdfLine(lines,text,{size:14,bold:true});}
+function addPdfSubheading(lines,text){addPdfLine(lines,'',{size:5});addPdfLine(lines,text,{size:12,bold:true});}
+function entityPdfLines(lines,label,e){ensureReceiptMeta(e);const nm=e.name||e.sbtName||label,typ=e.type||e.sbtType;addPdfSubheading(lines,`${label}: ${nm}`);addPdfLine(lines,`Entity type: ${entityTypeLabel(typ)}. Average: ${money(entityAvg(e))}. ${receiptPeriodSummary(e)}.`);const years=receiptYears();[1,2,3].forEach((n,i)=>{const year=years[i],st=yearStatus(e,n),raw=hasValue(e[`y${n}`])?money(e[`y${n}`]):'blank';if(st==='none')addPdfLine(lines,`${year}: Not in existence - excluded from the average.`,{indent:1});else if(st==='full')addPdfLine(lines,`${year}: Full year in operation - gross receipts ${raw}; amount used ${money(annualizedReceipt(e,n))}.`,{indent:1});else addPdfLine(lines,`${year}: Short taxable year (${yearMonths(e,n)||0} month${Number(yearMonths(e,n))===1?'':'s'}) - gross receipts ${raw}; annualized amount used ${money(annualizedReceipt(e,n))}.`,{indent:1});});}
+function ownershipPdfLines(lines,c){const r=testCandidate(c),bsTotal=hasValue(r.bsTotal)?r.bsTotal:r.candTotal,anchorPass=hasValue(r.anchorPass)?!!r.anchorPass:atLeast(r.anchorTotal,80),bsPass=hasValue(r.bsPass)?!!r.bsPass:atLeast(bsTotal,80),identicalPass=hasValue(r.identicalPass)?!!r.identicalPass:greaterThan(r.overlap,50);addPdfLine(lines,`Brother-sister result: ${anchorPass&&bsPass&&identicalPass?'Included':'Not included'}.`,{indent:1,bold:true});addPdfLine(lines,`80% controlling-interest test: anchor ${formatPct(r.anchorTotal,4)} (${anchorPass?'passes':'fails'}), brother-sister ${formatPct(bsTotal,4)} (${bsPass?'passes':'fails'}).`,{indent:1});addPdfLine(lines,`More-than-50% identical-ownership test: ${formatPct(r.overlap,4)} (${identicalPass?'passes':'fails'}).`,{indent:1});(r.ownerRows||[]).forEach(o=>addPdfLine(lines,`${o.name}: anchor ${formatPct(o.anchor,4)}; brother-sister ${formatPct(o.bs,4)}; lower-of ${formatPct(o.lower,4)}.`,{indent:2}));}
+function buildPdfReportLines(){const data=stateExportObject(),lines=[];const items=includedItems(),total=items.reduce((s,i)=>s+Number(i.receipts||0),0),threshold=currentThreshold();addPdfLine(lines,'GRACE PDF Export',{size:16,bold:true});addPdfLine(lines,'Gross Receipts Aggregation & Control Evaluator',{size:11,bold:true});addPdfLine(lines,`Generated: ${new Date(data.savedAt).toLocaleString()}`);addPdfLine(lines,`Tax year beginning: ${state.taxYear}. Threshold used: ${money(threshold)}.`);addPdfLine(lines,`Receipt rule: ${data.receiptRule}`);addPdfHeading(lines,'Aggregated result');addPdfLine(lines,`Aggregated average gross receipts: ${money(total)} / ${money(threshold)}. Result: ${total>threshold?'above threshold':'at or below threshold'}.`,{bold:true});items.forEach(i=>addPdfLine(lines,`${i.name}: ${money(i.receipts)} (${i.period}).`,{indent:1}));addPdfHeading(lines,'SBT receipt analysis');entityPdfLines(lines,'Small business taxpayer',state);if(state.upstreamChain.length){addPdfHeading(lines,'Upstream majority-owner chain');[...state.upstreamChain].reverse().forEach((e,i)=>entityPdfLines(lines,`Upstream level ${i+1}`,e));}else{addPdfHeading(lines,'Upstream majority-owner chain');addPdfLine(lines,'No upstream majority-owner chain was added.');}if(state.hasOwners===true){addPdfHeading(lines,'Common owner group');addPdfLine(lines,`Anchor entity: ${commonOwnerAnchorName()}.`);addPdfLine(lines,`Common owners: ${ownerLabel()}.`);state.ownerNames.forEach(o=>addPdfLine(lines,`${o.name||'Unnamed owner'}: anchor ${formatPct(o.pct,4)}.`,{indent:1}));}else if(state.hasOwners===false){addPdfHeading(lines,'Common owner group');addPdfLine(lines,'No common owner group was selected; brother-sister testing was skipped.');}if(state.downstreamChain.length){addPdfHeading(lines,'Downstream majority-owned chain');state.downstreamChain.forEach((e,i)=>entityPdfLines(lines,`Downstream level ${i+1}`,e));}else{addPdfHeading(lines,'Downstream majority-owned chain');addPdfLine(lines,state.downstreamClosed?'No downstream subsidiary branch was added.':'Downstream chain has not been resolved yet.');}const reportCandidates=state.candidates.map((c,i)=>({candidate:c,label:`Candidate ${i+1}`,saved:true}));if(state.hasOwners===true&&state.currentCandidate&&!isCurrentCandidateBlank())reportCandidates.push({candidate:state.currentCandidate,label:`Current candidate ${state.candidates.length+1}`,saved:false});if(reportCandidates.length){addPdfHeading(lines,'Brother-sister candidates');reportCandidates.forEach(item=>{entityPdfLines(lines,item.saved?item.label:`${item.label} (not yet added)`,item.candidate);if(!item.saved)addPdfLine(lines,'This candidate is shown because it has current on-screen entries, but it is not counted in the aggregated scale until Add candidate or Done is selected.',{indent:1});ownershipPdfLines(lines,item.candidate);});}else if(state.hasOwners===true){addPdfHeading(lines,'Brother-sister candidates');addPdfLine(lines,'No brother-sister candidates were saved.');}const trailItems=[...document.querySelectorAll('#trail li')].map(li=>li.textContent.trim()).filter(Boolean);if(trailItems.length){addPdfHeading(lines,'Decision trail');trailItems.forEach((t,i)=>addPdfLine(lines,`${i+1}. ${t}`));}const disclaimer=[...document.querySelectorAll('.disclaimer-box p')].map(p=>p.textContent.trim()).filter(Boolean);if(disclaimer.length){addPdfHeading(lines,'Notice and Disclaimer');disclaimer.forEach(t=>addPdfLine(lines,t));}return lines;}
+function paginatePdfLines(lines){const pages=[],top=742,bottom=58;let page=[],y=top;lines.forEach(line=>{const lh=line.text===''?7:(line.size||10)+4;if(y-lh<bottom&&page.length){pages.push(page);page=[];y=top;}if(line.text!=='')page.push({...line,y});y-=lh;});if(page.length)pages.push(page);return pages.length?pages:[[ {text:'GRACE PDF Export',size:16,bold:true,indent:0,y:742} ]];}
+function pdfPageContent(page,pageNo,pageCount){let out='';page.forEach(line=>{const size=line.size||10,font=line.bold?'/F2':'/F1',x=54+(line.indent||0)*18,y=line.y;out+=`BT ${font} ${size} Tf 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm ${pdfHex(line.text)} Tj ET\n`;});out+=`BT /F1 8 Tf 1 0 0 1 54 34 Tm ${pdfHex(`GRACE PDF Export - Page ${pageNo} of ${pageCount}`)} Tj ET\n`;return out;}
+function buildPdfBlob(lines){const pages=paginatePdfLines(lines),objects=[];objects.push('<< /Type /Catalog /Pages 2 0 R >>');objects.push(`<< /Type /Pages /Kids [${pages.map((_,i)=>`${5+i*2} 0 R`).join(' ')}] /Count ${pages.length} >>`);objects.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');objects.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');pages.forEach((page,i)=>{const pageObj=5+i*2,contentObj=pageObj+1,content=pdfPageContent(page,i+1,pages.length);objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObj} 0 R >>`);objects.push(`<< /Length ${content.length} >>\nstream\n${content}endstream`);});let pdf='%PDF-1.4\n',offsets=[0];objects.forEach((obj,i)=>{offsets[i+1]=pdf.length;pdf+=`${i+1} 0 obj\n${obj}\nendobj\n`;});const xref=pdf.length;pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;for(let i=1;i<=objects.length;i++)pdf+=`${String(offsets[i]).padStart(10,'0')} 00000 n \n`;pdf+=`trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;return new Blob([pdf],{type:'application/pdf'});}
+function exportState(){try{const blob=buildPdfBlob(buildPdfReportLines());const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download=`grace-report-${new Date().toISOString().slice(0,10)}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(err){alert('GRACE PDF export failed. Use your browser print menu and choose Save as PDF.');console.error(err);}}
+function startTour(){pendingTour=false;tourIndex=0;$('tourOverlay').classList.remove('hidden');positionTour();}
+function skipTour(){$('tourOverlay').classList.add('hidden');}
+function nextTourStep(){tourIndex++;if(tourIndex>=tourSteps.length){skipTour();return;}positionTour();}
+function positionTour(){const step=tourSteps[tourIndex],target=document.querySelector(step.selector)||$('app'),rect=target.getBoundingClientRect(),pad=8,highlight=$('tourHighlight'),card=$('tourCard');highlight.style.left=Math.max(8,rect.left-pad)+'px';highlight.style.top=Math.max(8,rect.top-pad)+'px';highlight.style.width=Math.max(80,Math.min(window.innerWidth-16,rect.width+pad*2))+'px';highlight.style.height=Math.max(50,Math.min(window.innerHeight-16,rect.height+pad*2))+'px';$('tourCount').textContent=`Step ${tourIndex+1} of ${tourSteps.length}`;$('tourTitle').textContent=step.title;$('tourBody').textContent=step.body;$('tourNext').textContent=tourIndex===tourSteps.length-1?'Done':'Next';const cardW=Math.min(340,window.innerWidth-40),placeRight=rect.right+24+cardW<window.innerWidth;let left=placeRight?rect.right+24:Math.max(20,Math.min(window.innerWidth-cardW-20,rect.left));let top=Math.max(20,Math.min(window.innerHeight-190,rect.top));card.style.left=left+'px';card.style.top=top+'px';}
+window.addEventListener('resize',()=>{scheduleLines();if(!$('tourOverlay').classList.contains('hidden'))positionTour();});
+window.copyEmail=copyEmail;window.commonOwnerChanged=commonOwnerChanged;window.candidateInputsChanged=candidateInputsChanged;window.next=next;window.back=back;window.addCandidate=addCandidate;window.finishCandidates=finishCandidates;window.resetCandidates=resetCandidates;window.render=render;window.enterAnalyzer=showIntake;window.returnToIntro=returnToIntro;window.showIntro=showIntro;window.showBackground=showBackground;window.showIntake=showIntake;window.startHowToUse=startHowToUse;window.showReference=showReference;window.showReferenceFromApp=showReferenceFromApp;window.fitMap=fitMap;window.zoomMap=zoomMap;window.updateReceiptField=updateReceiptField;window.updateMonthsInOperation=updateMonthsInOperation;window.setOperationPeriod=setOperationPeriod;window.setYearStatus=setYearStatus;window.updateYearMonths=updateYearMonths;window.numericValue=numericValue;window.selectDefaultZero=selectDefaultZero;window.liveUpdate=liveUpdate;window.clearFieldError=clearFieldError;window.toggleDisclaimerAccept=toggleDisclaimerAccept;window.acceptDisclaimer=acceptDisclaimer;window.declineDisclaimer=declineDisclaimer;window.exportState=exportState;window.skipTour=skipTour;window.nextTourStep=nextTourStep;window.startUpstreamMajority=startUpstreamMajority;window.saveUpstreamMajority=saveUpstreamMajority;window.cancelUpstreamDraft=cancelUpstreamDraft;window.setCommonOwnerAbove=setCommonOwnerAbove;window.setNoUpstreamAbove=setNoUpstreamAbove;window.reopenUpstream=reopenUpstream;window.removeLastUpstream=removeLastUpstream;window.startDownstreamEntity=startDownstreamEntity;window.saveDownstreamEntity=saveDownstreamEntity;window.cancelDownstreamDraft=cancelDownstreamDraft;window.closeDownstreamChain=closeDownstreamChain;window.reopenDownstream=reopenDownstream;window.removeLastDownstream=removeLastDownstream;
+initMapPan();
 
-  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const levelText = document.getElementById('levelText');
-    const scoreText = document.getElementById('scoreText');
-    const livesText = document.getElementById('livesText');
-
-    const keys = new Set();
-    window.addEventListener('keydown', e => {
-      keys.add(e.key.toLowerCase());
-      if ([' ', 'arrowup', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) e.preventDefault();
-      if (e.key.toLowerCase() === 'r' && (gameOver || gameWon)) resetGame();
-    });
-    window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
-
-    const GRAVITY = 0.65;
-    const FRICTION = 0.82;
-    let cameraX = 0;
-    let dollars = 0;
-    let lives = 3;
-    let currentLevel = 0;
-    let gameOver = false;
-    let gameWon = false;
-    let selectedCharacter = null;
-    let tick = 0;
-
-    const levels = [
-      {
-        name: 'Schedule C Prairie',
-        width: 1800,
-        start: { x: 70, y: 330 },
-        platforms: [[0,420,1800,60],[260,340,180,25],[560,295,170,25],[900,345,180,25],[1240,300,190,25]],
-        dollars: [[330,300],[430,300],[630,255],[710,255],[985,305],[1080,305],[1325,260],[1425,260],[1600,370]],
-        hazards: [[805,380,'paperwork'],[1185,380,'section']],
-        hawks: [{x:520,y:145,minX:480,maxX:1040,speed:2.0}],
-        goal: [1690,340]
-      },
-      {
-        name: 'Deduction Desert',
-        width: 2200,
-        start: { x: 70, y: 330 },
-        platforms: [[0,420,2200,60],[300,345,160,25],[590,300,160,25],[860,255,150,25],[1200,335,190,25],[1550,290,180,25]],
-        dollars: [[370,305],[450,305],[650,260],[740,260],[920,215],[990,215],[1285,295],[1380,295],[1625,250],[1725,250],[1940,370]],
-        hazards: [[520,380,'receipt'],[1110,380,'section'],[1460,380,'paperwork'],[1840,380,'receipt']],
-        hawks: [{x:740,y:150,minX:610,maxX:1210,speed:2.4},{x:1620,y:125,minX:1420,maxX:1980,speed:2.0}],
-        goal: [2090,340]
-      },
-      {
-        name: 'The Great Audit Frontier',
-        width: 2600,
-        start: { x: 70, y: 330 },
-        platforms: [[0,420,2600,60],[280,355,150,25],[540,305,150,25],[800,255,150,25],[1080,325,170,25],[1390,265,170,25],[1710,320,190,25],[2060,260,170,25]],
-        dollars: [[350,315],[425,315],[610,265],[700,265],[875,215],[955,215],[1150,285],[1245,285],[1465,225],[1555,225],[1815,280],[1905,280],[2140,220],[2230,220],[2410,370]],
-        hazards: [[465,380,'section'],[700,380,'paperwork'],[990,380,'receipt'],[1300,380,'section'],[1620,380,'paperwork'],[1980,380,'receipt'],[2310,380,'section']],
-        hawks: [{x:760,y:140,minX:560,maxX:1130,speed:2.7},{x:1500,y:105,minX:1230,maxX:1880,speed:2.2},{x:2140,y:150,minX:1970,maxX:2460,speed:2.5}],
-        goal: [2490,340]
-      }
-    ];
-
-    const player = {
-      x: 70,
-      y: 330,
-      w: 54,
-      h: 42,
-      vx: 0,
-      vy: 0,
-      speed: 0.8,
-      maxSpeed: 5.2,
-      jump: -14,
-      grounded: false,
-      invincible: 0
-    };
-
-    function rectsOverlap(a, b) {
-      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    }
-
-    function drawRect(x, y, w, h) {
-      ctx.fillRect(Math.round(x - cameraX), Math.round(y), w, h);
-    }
-
-    function drawText(text, x, y, size = 18, align = 'left') {
-      ctx.font = `${size}px Arial`;
-      ctx.textAlign = align;
-      ctx.fillText(text, Math.round(x - cameraX), Math.round(y));
-    }
-
-    function resetPlayer() {
-      const level = levels[currentLevel];
-      player.x = level.start.x;
-      player.y = level.start.y;
-      player.vx = 0;
-      player.vy = 0;
-      player.invincible = 75;
-    }
-
-    function resetGame() {
-      dollars = 0;
-      lives = 3;
-      currentLevel = 0;
-      gameOver = false;
-      gameWon = false;
-      tick = 0;
-      levels.forEach(level => level.dollars.forEach(d => d.collected = false));
-      resetPlayer();
-    }
-
-    function selectCharacter(type) {
-      selectedCharacter = type;
-      player.maxSpeed = type === 'ferret' ? 5.0 : 6.2;
-      player.jump = type === 'ferret' ? -15.5 : -13.2;
-      document.getElementById('splash').style.display = 'none';
-      resetGame();
-    }
-
-    function hitHazard() {
-      if (player.invincible > 0) return;
-      lives -= 1;
-      if (lives <= 0) gameOver = true;
-      else resetPlayer();
-    }
-
-    function movePlayer() {
-      const left = keys.has('arrowleft') || keys.has('a');
-      const right = keys.has('arrowright') || keys.has('d');
-      const jump = keys.has(' ') || keys.has('arrowup') || keys.has('w');
-
-      if (left) player.vx -= player.speed;
-      if (right) player.vx += player.speed;
-      player.vx = Math.max(-player.maxSpeed, Math.min(player.maxSpeed, player.vx));
-      if (!left && !right) player.vx *= FRICTION;
-
-      if (jump && player.grounded) {
-        player.vy = player.jump;
-        player.grounded = false;
-      }
-
-      player.vy += GRAVITY;
-      player.x += player.vx;
-      resolvePlatforms('x');
-      player.y += player.vy;
-      player.grounded = false;
-      resolvePlatforms('y');
-
-      const level = levels[currentLevel];
-      player.x = Math.max(0, Math.min(level.width - player.w, player.x));
-      if (player.y > canvas.height + 100) hitHazard();
-      if (player.invincible > 0) player.invincible--;
-    }
-
-    function resolvePlatforms(axis) {
-      const level = levels[currentLevel];
-      for (const p of level.platforms) {
-        const plat = { x: p[0], y: p[1], w: p[2], h: p[3] };
-        if (!rectsOverlap(player, plat)) continue;
-
-        if (axis === 'x') {
-          if (player.vx > 0) player.x = plat.x - player.w;
-          if (player.vx < 0) player.x = plat.x + plat.w;
-          player.vx = 0;
-        } else {
-          if (player.vy > 0) {
-            player.y = plat.y - player.h;
-            player.vy = 0;
-            player.grounded = true;
-          } else if (player.vy < 0) {
-            player.y = plat.y + plat.h;
-            player.vy = 0;
-          }
-        }
-      }
-    }
-
-    function updatePickupsAndHazards() {
-      const level = levels[currentLevel];
-
-      for (const d of level.dollars) {
-        if (d.collected) continue;
-        if (rectsOverlap(player, { x: d[0], y: d[1], w: 24, h: 24 })) {
-          d.collected = true;
-          dollars += 1;
-        }
-      }
-
-      for (const h of level.hazards) {
-        if (rectsOverlap(player, { x: h[0], y: h[1], w: 42, h: 42 })) hitHazard();
-      }
-
-      for (const hawk of level.hawks) {
-        const hawkX = hawk.x + Math.sin(tick * 0.025 * hawk.speed) * ((hawk.maxX - hawk.minX) / 2);
-        const center = (hawk.minX + hawk.maxX) / 2;
-        const actualX = center + Math.sin(tick * 0.025 * hawk.speed) * ((hawk.maxX - hawk.minX) / 2);
-        const actualY = hawk.y + Math.sin(tick * 0.04) * 18;
-        if (rectsOverlap(player, { x: actualX, y: actualY, w: 74, h: 38 })) hitHazard();
-      }
-
-      if (rectsOverlap(player, { x: level.goal[0], y: level.goal[1], w: 45, h: 80 })) {
-        if (currentLevel < levels.length - 1) {
-          currentLevel += 1;
-          resetPlayer();
-        } else {
-          gameWon = true;
-        }
-      }
-    }
-
-    function drawFerretSprite(x, y) {
-      const sx = Math.round(x - cameraX);
-      const sy = Math.round(y);
-      ctx.fillStyle = '#5c3317';
-      ctx.fillRect(sx - 6, sy + 25, 16, 7);
-      ctx.fillStyle = '#8b5a2b';
-      ctx.fillRect(sx + 4, sy + 20, 38, 17);
-      ctx.fillStyle = '#d6b48c';
-      ctx.fillRect(sx + 15, sy + 26, 20, 6);
-      ctx.fillStyle = '#c49a6c';
-      ctx.fillRect(sx + 36, sy + 8, 21, 21);
-      ctx.fillStyle = '#5c3317';
-      ctx.fillRect(sx + 39, sy + 4, 7, 7);
-      ctx.fillRect(sx + 52, sy + 4, 7, 7);
-      ctx.fillStyle = '#2f1b0c';
-      ctx.fillRect(sx + 40, sy + 16, 16, 6);
-      ctx.fillStyle = 'white';
-      ctx.fillRect(sx + 43, sy + 17, 3, 3);
-      ctx.fillRect(sx + 52, sy + 17, 3, 3);
-      ctx.fillStyle = '#111827';
-      ctx.fillRect(sx + 48, sy + 24, 5, 3);
-      ctx.fillStyle = '#3f2918';
-      ctx.fillRect(sx + 12, sy + 35, 6, 8);
-      ctx.fillRect(sx + 32, sy + 35, 6, 8);
-      ctx.fillStyle = '#111827';
-      ctx.font = '10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('FERRET', sx + 27, sy - 3);
-    }
-
-    function drawChiweenieSprite(x, y) {
-      const sx = Math.round(x - cameraX);
-      const sy = Math.round(y);
-      ctx.fillStyle = '#4a1d0b';
-      ctx.fillRect(sx - 4, sy + 24, 15, 6);
-      ctx.fillStyle = '#9a5a22';
-      ctx.fillRect(sx + 5, sy + 21, 39, 17);
-      ctx.fillStyle = '#facc15';
-      ctx.fillRect(sx + 33, sy + 25, 11, 8);
-      ctx.fillStyle = '#9a5a22';
-      ctx.fillRect(sx + 38, sy + 8, 20, 22);
-      ctx.fillStyle = '#4a1d0b';
-      ctx.fillRect(sx + 31, sy + 9, 9, 22);
-      ctx.fillRect(sx + 55, sy + 9, 9, 22);
-      ctx.fillStyle = '#facc15';
-      ctx.fillRect(sx + 45, sy + 21, 10, 7);
-      ctx.fillStyle = '#111827';
-      ctx.fillRect(sx + 43, sy + 16, 3, 3);
-      ctx.fillRect(sx + 53, sy + 16, 3, 3);
-      ctx.fillRect(sx + 50, sy + 25, 5, 3);
-      ctx.fillStyle = '#4a1d0b';
-      ctx.fillRect(sx + 14, sy + 36, 6, 8);
-      ctx.fillRect(sx + 34, sy + 36, 6, 8);
-      ctx.fillStyle = '#111827';
-      ctx.font = '10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('CHIWEENIE', sx + 30, sy - 3);
-    }
-
-    function drawAuditHawk(x, y, wingFlip) {
-      const sx = Math.round(x - cameraX);
-      const sy = Math.round(y);
-      ctx.fillStyle = '#3f3f46';
-      ctx.fillRect(sx + 20, sy + 14, 34, 16);
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillRect(sx + 50, sy + 18, 10, 6);
-      ctx.fillStyle = '#27272a';
-      if (wingFlip) {
-        ctx.fillRect(sx + 4, sy + 4, 26, 10);
-        ctx.fillRect(sx + 43, sy + 4, 26, 10);
-      } else {
-        ctx.fillRect(sx + 4, sy + 30, 26, 10);
-        ctx.fillRect(sx + 43, sy + 30, 26, 10);
-      }
-      ctx.fillStyle = 'white';
-      ctx.fillRect(sx + 43, sy + 17, 5, 5);
-      ctx.fillStyle = '#111827';
-      ctx.fillRect(sx + 45, sy + 18, 3, 3);
-      ctx.font = '10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('AUDIT HAWK', sx + 36, sy - 5);
-    }
-
-    function drawLevel() {
-      const level = levels[currentLevel];
-      cameraX = Math.max(0, Math.min(level.width - canvas.width, player.x - 260));
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = 'rgba(255,255,255,.72)';
-      drawText('1040', 130, 90, 28);
-      drawText('W-2', 460, 130, 24);
-      drawText('1099', 760, 80, 24);
-      drawText('K-1', 1160, 120, 24);
-      drawText('IRS', 1510, 95, 24);
-      drawText('TAX', 2020, 115, 24);
-
-      ctx.fillStyle = '#166534';
-      for (const p of level.platforms) drawRect(p[0], p[1], p[2], p[3]);
-      ctx.fillStyle = '#854d0e';
-      for (const p of level.platforms) drawRect(p[0], p[1] + p[3] - 8, p[2], 8);
-
-      for (const d of level.dollars) {
-        if (d.collected) continue;
-        ctx.fillStyle = '#22c55e';
-        ctx.beginPath();
-        ctx.arc(Math.round(d[0] + 12 - cameraX), d[1] + 12, 13, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#052e16';
-        drawText('$', d[0] + 12, d[1] + 19, 19, 'center');
-      }
-
-      for (const h of level.hazards) {
-        ctx.fillStyle = h[2] === 'section' ? '#7c2d12' : '#ef4444';
-        drawRect(h[0], h[1], 42, 42);
-        ctx.fillStyle = 'white';
-        const label = h[2] === 'section' ? '§' : h[2] === 'receipt' ? 'RCPT' : 'FORM';
-        drawText(label, h[0] + 21, h[1] + 27, h[2] === 'section' ? 29 : 11, 'center');
-      }
-
-      for (const hawk of level.hawks) {
-        const center = (hawk.minX + hawk.maxX) / 2;
-        const actualX = center + Math.sin(tick * 0.025 * hawk.speed) * ((hawk.maxX - hawk.minX) / 2);
-        const actualY = hawk.y + Math.sin(tick * 0.04) * 18;
-        drawAuditHawk(actualX, actualY, Math.floor(tick / 12) % 2 === 0);
-      }
-
-      ctx.fillStyle = '#2563eb';
-      drawRect(level.goal[0], level.goal[1], 45, 80);
-      ctx.fillStyle = 'white';
-      drawText('FILE', level.goal[0] + 22, level.goal[1] + 45, 13, 'center');
-
-      if (player.invincible % 10 < 6) {
-        if (selectedCharacter === 'ferret') drawFerretSprite(player.x, player.y);
-        if (selectedCharacter === 'chiweenie') drawChiweenieSprite(player.x, player.y);
-      }
-
-      ctx.fillStyle = '#111827';
-      ctx.font = '18px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText(level.name, 20, 32);
-
-      if (gameOver || gameWon) {
-        ctx.fillStyle = 'rgba(17, 24, 39, .82)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.font = '44px Arial';
-        ctx.fillText(gameWon ? 'Mission Complete!' : 'Audit Overload!', canvas.width / 2, 205);
-        ctx.font = '21px Arial';
-        if (gameWon) {
-          const winner = selectedCharacter === 'ferret' ? 'The Ferret Tax Division thanks you for your service.' : 'The Chiweenie Filing Unit has safely delivered every return.';
-          ctx.fillText(`Final dollars: ${dollars}`, canvas.width / 2, 250);
-          ctx.fillText(winner, canvas.width / 2, 285);
-          ctx.fillText('Press R to play again.', canvas.width / 2, 320);
-        } else {
-          ctx.fillText('Press R to try again.', canvas.width / 2, 250);
-        }
-      }
-    }
-
-    function updateHud() {
-      levelText.textContent = `Level: ${currentLevel + 1} of ${levels.length}`;
-      scoreText.textContent = `Dollars: ${dollars}`;
-      livesText.textContent = `Lives: ${lives}`;
-    }
-
-    function loop() {
-      tick++;
-      if (selectedCharacter && !gameOver && !gameWon) {
-        movePlayer();
-        updatePickupsAndHazards();
-      }
-      updateHud();
-      drawLevel();
-      requestAnimationFrame(loop);
-    }
-
-    resetGame();
-    loop();
-  </script>
+</script>
 </body>
 </html>
-
